@@ -1,0 +1,46 @@
+[tool.poetry]
+name = "portable-device"
+version = "0.1.0"
+description = "Access to devices using Windows Portable Devices (WPD)"
+authors = ["Martin Herrmann <martin@famherrmann.de>"]
+homepage = "https://github.com/deffi/python_portable_device"
+repository = "https://github.com/deffi/python_portable_device.git"
+
+license = "AGPL-3.0-or-later"
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Environment :: Win32 (MS Windows)",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Topic :: System :: Hardware",
+    "Topic :: System :: Hardware :: Universal Serial Bus (USB)"
+]
+
+readme = "readme.md"
+packages = [{ include = "portable_device", from = "src" }]
+
+
+[tool.poetry.dependencies]
+python = "^3.11"
+typer = "*"
+#portable_device_api = "*"
+
+[tool.poetry.group.test.dependencies]
+pytest = "*"
+
+[tool.poetry.urls]
+"Issue tracker" = "https://github.com/deffi/python_portable_device/issues"
+
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+markers = [
+    "device: tests that access a device",
+]
