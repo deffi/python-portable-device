@@ -90,7 +90,7 @@ class Device:
 
     # Object access
 
-    def walk(self, depth = 0) -> Iterator[Object]:
+    def walk(self, depth = 0) -> Iterator[tuple[int, Object]]:
         yield from self.root_object.walk(depth = 0)
 
     # Context manager ##########################################################
