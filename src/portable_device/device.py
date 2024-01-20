@@ -1,7 +1,10 @@
 from collections.abc import Iterator, Callable
 from functools import cache
-from portable_device_api import PortableDeviceManager, PortableDevice
+from portable_device_api import (PortableDeviceManager, PortableDevice, PortableDeviceContent, PortableDeviceProperties,
+                                 definitions)
 from typing import Self
+
+from portable_device import Object
 
 
 @cache
@@ -70,6 +73,26 @@ class Device:
         """Can be accessed without opening the device"""
         return _manager().get_device_manufacturer(self._device_id)
 
+    @property
+    @cache
+    def _content(self) -> PortableDeviceContent:
+        return self._device.content()
+
+    @property
+    @cache
+    def _properties(self) -> PortableDeviceProperties:
+        return self._content.properties()
+
+    @property
+    @cache
+    def root_object(self) -> Object:
+        return Object(self, definitions.WPD_DEVICE_OBJECT_ID)
+
+    # Object access
+
+    def walk(self, depth = 0) -> Iterator[Object]:
+        yield from self.root_object.walk(depth = 0)
+
     # Context manager ##########################################################
 
     def __enter__(self):
@@ -78,9 +101,3 @@ class Device:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
-
-
-# def walk(content: PortableDeviceContent, object_id: str, depth = 0) -> Iterator[int, str]:
-#     yield depth, object_id
-#     for child_object_id in content.enum_objects(object_id).next(999):
-#         yield from walk(content, child_object_id, depth+1)

@@ -15,8 +15,40 @@ def devices():
 
 
 @typer_app.command()
-def ls():
-    ...
+def ls(device_description: str):
+    # TODO better error message if the device is not open
+    with Device.by_description(device_description) as device:
+        print(f"{'Object ID':<55}{'Content type':<42}{'Object name':<40}{'Original file name':<45}")
+        print(f"{'---------':<55}{'------------':<42}{'-----------':<40}{'------------------':<45}")
+
+        for depth, object_ in device.walk():
+            # keys = PortableDeviceKeyCollection.create()
+            # keys.add(defs.WPD_OBJECT_NAME)
+            # keys.add(defs.WPD_OBJECT_ORIGINAL_FILE_NAME)
+            # keys.add(defs.WPD_OBJECT_CONTENT_TYPE)
+            # property_values = properties.get_values(oid, keys)
+            #
+            # try:
+            #     content_type = property_values.get_guid_value(defs.WPD_OBJECT_CONTENT_TYPE)
+            #     content_type = defs.reverse_lookup.get(content_type, content_type)
+            # except COMError:
+            #     content_type = None
+            # try:
+            #     object_name = property_values.get_string_value(defs.WPD_OBJECT_NAME)
+            # except COMError:
+            #     object_name = None
+            # try:
+            #     original_file_name = property_values.get_string_value(defs.WPD_OBJECT_ORIGINAL_FILE_NAME)
+            # except COMError:
+            #     original_file_name = None
+            #
+            oid = object_._object_id
+            content_type = None
+            object_name = None
+            original_file_name = None
+
+            print(f"{'  ' * depth}{oid:<55}{content_type!s:<42}{object_name!s:<40}{original_file_name!s:<45}")
+            # _dump_properties(properties, oid, depth + 1)
 
 
 if __name__ == "__main__":
@@ -50,42 +82,3 @@ if __name__ == "__main__":
 #             f"{'  ' * (depth + 1)}{defs.reverse_lookup.get(property_key, str(property_key))} = {property_value}")
 #
 #         # _dump_property_attributes(properties, object_id, property_key, depth + 1)
-#
-#
-# def _ls(device_description: str) -> None:
-#     manager = PortableDeviceManager.create()
-#     device_id = [device_id for device_id in manager.get_devices() if
-#                  manager.get_device_description(device_id) == device_description][0]
-#
-#     device = PortableDevice.create()
-#     device.open(device_id)
-#     content = device.content()
-#     properties = content.properties()
-#
-#     object_id = defs.WPD_DEVICE_OBJECT_ID
-#
-#     print(f"{'Object ID':<55}{'Content type':<42}{'Object name'!s:<40}{'Original file name'!s:<45}")
-#
-#     for depth, oid in walk(content, object_id):
-#         keys = PortableDeviceKeyCollection.create()
-#         keys.add(defs.WPD_OBJECT_NAME)
-#         keys.add(defs.WPD_OBJECT_ORIGINAL_FILE_NAME)
-#         keys.add(defs.WPD_OBJECT_CONTENT_TYPE)
-#         property_values = properties.get_values(oid, keys)
-#
-#         try:
-#             content_type = property_values.get_guid_value(defs.WPD_OBJECT_CONTENT_TYPE)
-#             content_type = defs.reverse_lookup.get(content_type, content_type)
-#         except COMError:
-#             content_type = None
-#         try:
-#             object_name = property_values.get_string_value(defs.WPD_OBJECT_NAME)
-#         except COMError:
-#             object_name = None
-#         try:
-#             original_file_name = property_values.get_string_value(defs.WPD_OBJECT_ORIGINAL_FILE_NAME)
-#         except COMError:
-#             original_file_name = None
-#
-#         print(f"{'  ' * depth}{oid:<55}{content_type!s:<42}{object_name!s:<40}{original_file_name!s:<45}")
-#         _dump_properties(properties, oid, depth + 1)
