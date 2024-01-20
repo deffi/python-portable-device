@@ -26,6 +26,17 @@ files = [
 ]
 
 [[package]]
+name = "comtypes"
+version = "1.2.1"
+description = "Pure Python COM package"
+optional = false
+python-versions = "*"
+files = [
+    {file = "comtypes-1.2.1-py2.py3-none-any.whl", hash = "sha256:fe1f10126d623ffd8075a9c926e7c5b3b5e9249a2e8674f772d5d4e2c8f33d63"},
+    {file = "comtypes-1.2.1.zip", hash = "sha256:7284c781ace845daa1fa0a28c5f702e51982002ac12d27a2b8862d4f21f52f8e"},
+]
+
+[[package]]
 name = "iniconfig"
 version = "2.0.0"
 description = "brain-dead simple config-ini parsing"
@@ -61,6 +72,22 @@ files = [
 [package.extras]
 dev = ["pre-commit", "tox"]
 testing = ["pytest", "pytest-benchmark"]
+
+[[package]]
+name = "portable-device-api"
+version = "0.1.0"
+description = "A wrapper around the Windows Portable Devices (WPD) API"
+optional = false
+python-versions = "^3.11"
+files = []
+develop = true
+
+[package.dependencies]
+comtypes = "*"
+
+[package.source]
+type = "directory"
+url = "../python_portable_device_api"
 
 [[package]]
 name = "pytest"
@@ -117,4 +144,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "54d9eaf05ecdf6457152bfef8fb321dad0aa975c02a434d0b8126544f1d9bfce"
+content-hash = "ac31b75ac710da9ac39141ec242c2a55d50e5584efced5ec0fa618d4de4a8a51"
