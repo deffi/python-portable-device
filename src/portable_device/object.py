@@ -51,4 +51,5 @@ class Object:
         # have to use property_values.get_count and property_values.get_at
         # (returns key, value) and check for presence ourselves.
         # Also explain this in portable_device_api.PortableDeviceValues
+        # Or maybe we could embed the expected value in the PropertyKey
         return [property_values.get_value(key).value for key in keys]
