@@ -5,6 +5,7 @@ from portable_device_api import (PortableDeviceManager, PortableDevice, Portable
 from typing import Self
 
 from portable_device import Object
+from portable_device.exceptions import DeviceNotFound
 
 
 @cache
@@ -25,7 +26,8 @@ class Device:
             yield cls(device_id)
 
     @classmethod
-    def by_description(cls, description: str, *, refresh = True, description_map: Callable[[str], str] = str.strip):
+    def by_description(cls, description: str, *,
+                       refresh = True, description_map: Callable[[str], str] = str.strip) -> Self:
         if refresh:
             _manager().refresh_device_list()
 
@@ -35,15 +37,19 @@ class Device:
 
             if this_device_description == description:
                 return Device(device_id)
+        else:
+            raise DeviceNotFound(description)
 
     @classmethod
-    def by_friendly_name(cls, friendly_name: str, *, refresh = True):
+    def by_friendly_name(cls, friendly_name: str, *, refresh = True) -> Self:
         if refresh:
             _manager().refresh_device_list()
 
         for device_id in _manager().get_devices():
             if _manager().get_device_friendly_name(device_id) == friendly_name:
                 return Device(device_id)
+        else:
+            raise DeviceNotFound(friendly_name)
 
     # Open #####################################################################
 

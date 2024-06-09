@@ -1,7 +1,10 @@
+import sys
+
 import cyclopts
 from portable_device_api import definitions
 
 from portable_device import Device
+from portable_device.exceptions import DeviceNotFound
 
 cyclopts_app = cyclopts.App()
 
@@ -47,24 +50,28 @@ def devices():
 
 @cyclopts_app.command()
 def ls(device_description: str):
-    # TODO better error message if the device is not open
-    with Device.by_description(device_description) as device:
-        print(f"{'Object ID':<55}{'Content type':<42}{'Object name':<40}{'Original file name':<45}")
-        print(f"{'---------':<55}{'------------':<42}{'-----------':<40}{'------------------':<45}")
+    try:
+        with Device.by_description(device_description) as device:
+            # TODO no fixed width
+            print(f"{'Object ID':<55}{'Content type':<42}{'Object name':<40}{'Original file name':<45}")
+            print(f"{'---------':<55}{'------------':<42}{'-----------':<40}{'------------------':<45}")
 
-        for depth, object_ in device.walk():
-            oid = object_._object_id
+            for depth, object_ in device.walk():
+                oid = object_._object_id
 
-            content_type, object_name, original_file_name = object_.get_properties([
-                definitions.WPD_OBJECT_CONTENT_TYPE,
-                definitions.WPD_OBJECT_NAME,
-                definitions.WPD_OBJECT_ORIGINAL_FILE_NAME,
-            ])
-            content_type = definitions.reverse_lookup.get(content_type, content_type)
+                content_type, object_name, original_file_name = object_.get_properties([
+                    definitions.WPD_OBJECT_CONTENT_TYPE,
+                    definitions.WPD_OBJECT_NAME,
+                    definitions.WPD_OBJECT_ORIGINAL_FILE_NAME,
+                ])
+                content_type = definitions.reverse_lookup.get(content_type, content_type)
 
-            print(f"{'  ' * depth}{oid:<55}{content_type:<42}{object_name:<40}{original_file_name:<45}")
-            # _dump_properties(properties, oid, depth + 1)
+                print(f"{'  ' * depth}{oid:<55}{content_type:<42}{object_name:<40}{original_file_name:<45}")
+                # _dump_properties(properties, oid, depth + 1)
+    except DeviceNotFound as e:
+        print(e)
+        return 1
 
 
 if __name__ == "__main__":
-    cyclopts_app()
+    sys.exit(cyclopts_app())
