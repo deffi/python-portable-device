@@ -1,12 +1,12 @@
-import typer
+import cyclopts
 from portable_device_api import definitions
 
 from portable_device import Device
 
-typer_app = typer.Typer()
+cyclopts_app = cyclopts.App()
 
 
-@typer_app.command()
+@cyclopts_app.command()
 def devices():
     print(f"{'Description':<25}{'Friendly name':<25}{'Manufacturer':<25}")
     print(f"{'-----------':<25}{'-------------':<25}{'------------':<25}")
@@ -45,7 +45,7 @@ def devices():
 #         # _dump_property_attributes(properties, object_id, property_key, depth + 1)
 
 
-@typer_app.command()
+@cyclopts_app.command()
 def ls(device_description: str):
     # TODO better error message if the device is not open
     with Device.by_description(device_description) as device:
@@ -67,4 +67,4 @@ def ls(device_description: str):
 
 
 if __name__ == "__main__":
-    typer_app()
+    cyclopts_app()

@@ -24,7 +24,7 @@ packages = [{ include = "portable_device", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-typer = "*"
+cyclopts = "*"
 #portable_device_api = "*"
 portable-device-api = {path = "../python-portable-device-api", develop = true}
 
