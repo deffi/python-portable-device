@@ -26,7 +26,7 @@ packages = [{ include = "portable_device", from = "src" }]
 python = "^3.11"
 typer = "*"
 #portable_device_api = "*"
-portable-device-api = {path = "../python_portable_device_api", develop = true}
+portable-device-api = {path = "../python-portable-device-api", develop = true}
 
 [tool.poetry.group.test.dependencies]
 pytest = "*"
