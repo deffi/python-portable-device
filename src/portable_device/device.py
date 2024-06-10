@@ -21,8 +21,12 @@ class Device:
     # Creation #################################################################
 
     @classmethod
+    def ids(cls, refresh = True) -> Iterator[str]:
+        yield from _manager().get_devices()
+
+    @classmethod
     def all(cls, refresh = True) -> Iterator[Self]:
-        for device_id in _manager().get_devices():
+        for device_id in cls.ids(refresh = refresh):
             yield cls(device_id)
 
     @classmethod
