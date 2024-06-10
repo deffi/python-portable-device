@@ -98,12 +98,12 @@ class Device:
     def _properties(self) -> PortableDeviceProperties:
         return self._content.properties()
 
+    # Object access ############################################################
+
     @property
     @cache
     def root_object(self) -> Object:
         return Object(self, definitions.WPD_DEVICE_OBJECT_ID)
-
-    # Object access
 
     def walk(self, depth = 0) -> Iterator[tuple[int, Object]]:
         yield from self.root_object.walk(depth = 0)
