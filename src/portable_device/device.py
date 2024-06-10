@@ -66,6 +66,11 @@ class Device:
     # Properties ###############################################################
 
     @property
+    def device_id(self) -> str:
+        """Can be accessed without opening the device"""
+        return self._device_id
+
+    @property
     @cache
     def description(self) -> str:
         """Can be accessed without opening the device"""
