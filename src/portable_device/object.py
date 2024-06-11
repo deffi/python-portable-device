@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterator, Iterable, Sequence
 from typing import TYPE_CHECKING, Self
 
-from portable_device_api import definitions, PortableDeviceKeyCollection, PropertyKey
+from portable_device_api import definitions, PortableDeviceKeyCollection, PropertyKey, PortableDeviceValues
 
 if TYPE_CHECKING:
     from portable_device import Device
@@ -53,3 +53,11 @@ class Object:
         # Also explain this in portable_device_api.PortableDeviceValues
         # Or maybe we could embed the expected value in the PropertyKey
         return [property_values.get_value(key).value for key in keys]
+
+    def create_directory(self, parent_object_id: str, dir_name: str) -> str:
+        values = PortableDeviceValues.create()
+        values.set_guid_value(definitions.WPD_OBJECT_CONTENT_TYPE, definitions.WPD_CONTENT_TYPE_FOLDER)
+        values.set_string_value(definitions.WPD_OBJECT_PARENT_ID, parent_object_id)
+        values.set_string_value(definitions.WPD_OBJECT_NAME, dir_name)
+
+        return self._content.create_object_with_properties_only(values)
