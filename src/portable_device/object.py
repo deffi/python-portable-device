@@ -57,14 +57,13 @@ class Object:
         # Or maybe we could embed the expected value in the PropertyKey
         return [property_values.get_value(key).value for key in keys]
 
-    # TODO what's that return value?
-    def create_directory(self, parent_object_id: str, dir_name: str) -> str:
+    def create_directory(self, dir_name: str) -> Self:
         values = PortableDeviceValues.create()
         values.set_guid_value(definitions.WPD_OBJECT_CONTENT_TYPE, definitions.WPD_CONTENT_TYPE_FOLDER)
-        values.set_string_value(definitions.WPD_OBJECT_PARENT_ID, parent_object_id)
+        values.set_string_value(definitions.WPD_OBJECT_PARENT_ID, self._object_id)
         values.set_string_value(definitions.WPD_OBJECT_NAME, dir_name)
 
-        return self._content.create_object_with_properties_only(values)
+        return type(self)(self._device, self._content.create_object_with_properties_only(values))
 
     def get_child_by_name(self, child_name: str) -> Self:
         object_ids = self._content.enum_objects(self._object_id).next(999)  # TODO arbitrary number
