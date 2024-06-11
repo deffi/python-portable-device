@@ -102,11 +102,11 @@ class Device:
 
     @property
     @cache
-    def root_object(self) -> Object:
+    def device_object(self) -> Object:
         return Object(self, definitions.WPD_DEVICE_OBJECT_ID)
 
     def walk(self, depth = 0) -> Iterator[tuple[int, Object]]:
-        yield from self.root_object.walk(depth = 0)
+        yield from self.device_object.walk(depth = 0)
 
     # Context manager ##########################################################
 

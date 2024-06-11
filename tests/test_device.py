@@ -65,7 +65,7 @@ class TestDevice:
     def test_root_object(self, device):
         # TODO document what happens if it's not open, or detect and throw exception
         with device:
-            assert isinstance(device.root_object, Object)
+            assert isinstance(device.device_object, Object)
 
     @pytest.mark.device
     def test_walk(self, device):
