@@ -54,6 +54,7 @@ class Object:
         # Or maybe we could embed the expected value in the PropertyKey
         return [property_values.get_value(key).value for key in keys]
 
+    # TODO what's that return value?
     def create_directory(self, parent_object_id: str, dir_name: str) -> str:
         values = PortableDeviceValues.create()
         values.set_guid_value(definitions.WPD_OBJECT_CONTENT_TYPE, definitions.WPD_CONTENT_TYPE_FOLDER)
@@ -61,3 +62,12 @@ class Object:
         values.set_string_value(definitions.WPD_OBJECT_NAME, dir_name)
 
         return self._content.create_object_with_properties_only(values)
+
+    def get_child_by_name(self, child_name: str) -> Self:
+        object_ids = self._content.enum_objects(self._object_id).next(999)  # TODO arbitrary number
+        keys = PortableDeviceKeyCollection.create()
+        keys.add(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME)
+        matching_object_ids = [oid for oid in object_ids if self._properties.get_values(oid, keys).get_string_value(
+            definitions.WPD_OBJECT_ORIGINAL_FILE_NAME) == child_name]
+        assert len(matching_object_ids) == 1
+        return type(self)(self._device, matching_object_ids[0])
