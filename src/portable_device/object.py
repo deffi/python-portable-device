@@ -3,7 +3,10 @@ from __future__ import annotations
 from collections.abc import Iterator, Iterable, Sequence
 from typing import TYPE_CHECKING, Self
 
-from portable_device_api import definitions, PortableDeviceKeyCollection, PropertyKey, PortableDeviceValues
+from comtypes.automation import VT_LPWSTR
+
+from portable_device_api import (definitions, PortableDeviceKeyCollection, PropertyKey, PortableDeviceValues,
+                                 PortableDevicePropVariantCollection, PropVariant)
 
 if TYPE_CHECKING:
     from portable_device import Device
@@ -71,3 +74,8 @@ class Object:
             definitions.WPD_OBJECT_ORIGINAL_FILE_NAME) == child_name]
         assert len(matching_object_ids) == 1
         return type(self)(self._device, matching_object_ids[0])
+
+    def delete(self):
+        object_ids_pvc = PortableDevicePropVariantCollection.create()
+        object_ids_pvc.add(PropVariant.create(VT_LPWSTR, self._object_id))
+        self._content.delete(definitions.DELETE_OBJECT_OPTIONS.PORTABLE_DEVICE_DELETE_NO_RECURSION, object_ids_pvc)
