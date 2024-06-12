@@ -1,6 +1,7 @@
+from datetime import datetime
 import re
 
-from portable_device_api import errors
+from portable_device_api import errors, definitions
 import pytest
 
 from portable_device import Object
@@ -70,3 +71,10 @@ class TestObject:
 
         assert subdir.delete(True) == 0
         assert dir_name not in test_dir.children().object_names()
+
+    @pytest.mark.device
+    def test_supported_properties(self, test_dir):
+        supported_properties = test_dir.supported_properties()
+        assert definitions.WPD_OBJECT_CONTENT_TYPE in supported_properties
+        assert definitions.WPD_OBJECT_DATE_CREATED in supported_properties
+

@@ -128,3 +128,8 @@ class Object:
         while chunk := stream.remote_read(optimal_transfer_size):
             buffer.extend(chunk)
         return buffer
+
+    def supported_properties(self) -> list[PropertyKey]:
+        supported_properties = self._properties.get_supported_properties(self._object_id)
+        return [supported_properties.get_at(i) for i in range(supported_properties.get_count())]
+
