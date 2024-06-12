@@ -24,6 +24,12 @@ class Object:
     def object_id(self) -> str:
         return self._object_id
 
+    # TODO test that it can be changed or cache it
+    def object_name(self) -> str:
+        keys = PortableDeviceKeyCollection.create()
+        keys.add(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME)
+        return self._properties.get_values(self._object_id, keys).get_string_value(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME)
+
     def children(self) -> Iterator[Self]:
         enum_object_ids = self._content.enum_objects(self._object_id)
 

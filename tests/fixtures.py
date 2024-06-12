@@ -3,7 +3,7 @@ import os
 
 import pytest
 
-from portable_device import Device
+from portable_device import Device, Object
 
 
 @pytest.fixture(scope = "session")
@@ -18,7 +18,7 @@ def device():
 
 
 @pytest.fixture(scope = "session")
-def test_dir():
+def test_dir() -> Object:
     # TODO duplication in parsing the string
     # TODO use device fixture instead
     device_description, base_name = os.environ["PORTABLE_DEVICE_TEST_PATH"].split("/")
