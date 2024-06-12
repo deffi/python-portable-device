@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Self
 from comtypes.automation import VT_LPWSTR
 
 from portable_device_api import (definitions, PortableDeviceKeyCollection, PropertyKey, PortableDeviceValues,
-                                 PortableDevicePropVariantCollection, PropVariant)
+                                 PortableDevicePropVariantCollection, PropVariant, errors)
 
 if TYPE_CHECKING:
     from portable_device import Device
@@ -80,7 +80,17 @@ class Object:
         assert len(matching_object_ids) == 1
         return type(self)(self._device, matching_object_ids[0])
 
-    def delete(self):
+    def delete(self, recursive: bool):
         object_ids_pvc = PortableDevicePropVariantCollection.create()
+        # TODO multi-delete
         object_ids_pvc.add(PropVariant.create(VT_LPWSTR, self._object_id))
-        self._content.delete(definitions.DELETE_OBJECT_OPTIONS.PORTABLE_DEVICE_DELETE_NO_RECURSION, object_ids_pvc)
+
+        if recursive:
+            flags = definitions.DELETE_OBJECT_OPTIONS.PORTABLE_DEVICE_DELETE_WITH_RECURSION
+        else:
+            flags = definitions.DELETE_OBJECT_OPTIONS.PORTABLE_DEVICE_DELETE_NO_RECURSION
+
+        delete_result = self._content.delete(flags, object_ids_pvc)
+        assert delete_result.get_count() == 1
+        # TODO exception if the hresult is not 0
+        return errors.to_hresult(delete_result.get_at(0).value)

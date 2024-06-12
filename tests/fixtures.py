@@ -33,4 +33,4 @@ def test_dir() -> Object:
 
         test_dir = base.create_directory(timestamp)
         yield test_dir
-        test_dir.delete()
+        test_dir.delete(recursive=False)
