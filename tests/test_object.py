@@ -30,3 +30,28 @@ class TestObject:
         # TODO own error reporting
         assert delete_result == errors.ERROR_FILE_NOT_FOUND
         assert dir_name not in [child.object_name() for child in test_dir.children()]
+
+    @pytest.mark.device
+    def test_upload_download_remove_file(self, test_dir):
+        content = "hello\nportable_device_api\ntest".encode()
+        file_name = "upload.txt"
+        assert file_name not in [child.object_name() for child in test_dir.children()]
+
+        # Create the file
+        file = test_dir.upload_file(file_name, content)
+        assert file_name in [child.object_name() for child in test_dir.children()]
+        assert test_dir.get_child_by_name(file_name).object_id == file.object_id
+
+        # Download the file
+        assert file.download() == content
+        assert file_name in [child.object_name() for child in test_dir.children()]
+
+        # Remove the file
+        delete_result = file.delete(False)
+        assert delete_result == 0
+        assert file_name not in [child.object_name() for child in test_dir.children()]
+
+        # Remove the file again (it's missing now)
+        delete_result = file.delete(False)
+        assert delete_result == errors.ERROR_FILE_NOT_FOUND
+        assert file_name not in [child.object_name() for child in test_dir.children()]

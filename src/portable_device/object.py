@@ -94,3 +94,30 @@ class Object:
         assert delete_result.get_count() == 1
         # TODO exception if the hresult is not 0
         return errors.to_hresult(delete_result.get_at(0).value)
+
+    # TODO rename
+    def upload_file(self, file_name: str, content: bytes) -> Self:
+        values = PortableDeviceValues.create()
+        values.set_string_value(definitions.WPD_OBJECT_PARENT_ID, self._object_id)
+        values.set_unsigned_large_integer_value(definitions.WPD_OBJECT_SIZE, len(content))
+        values.set_string_value(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME, file_name)
+        values.set_string_value(definitions.WPD_OBJECT_NAME, file_name)
+
+        stream, chunk_size = self._content.create_object_with_properties_and_data(values)
+        buffer = bytearray(content)
+        while buffer:
+            this_chunk_size = min(len(buffer), chunk_size)
+            chunk = buffer[0:this_chunk_size]
+            buffer[0:this_chunk_size] = []
+            stream.remote_write(chunk)
+        stream.commit()
+
+        return type(self)(self._device, stream.get_object_id())
+
+    # TODO rename
+    def download(self) -> bytes:
+        stream, optimal_transfer_size = self._content.transfer().get_stream(self._object_id)
+        buffer = bytearray()
+        while chunk := stream.remote_read(optimal_transfer_size):
+            buffer.extend(chunk)
+        return buffer
