@@ -55,3 +55,18 @@ class TestObject:
         delete_result = file.delete(False)
         assert delete_result == errors.ERROR_FILE_NOT_FOUND
         assert file_name not in [child.object_name() for child in test_dir.children()]
+
+    @pytest.mark.device
+    def test_recursive_delete(self, test_dir):
+        dir_name = "foo"
+        assert dir_name not in [child.object_name() for child in test_dir.children()]
+
+        subdir = test_dir.create_directory(dir_name)
+        subdir.upload_file("bar", b"bar")
+        assert dir_name in [child.object_name() for child in test_dir.children()]
+
+        assert subdir.delete(False) == errors.ERROR_DIR_NOT_EMPTY
+        assert dir_name in [child.object_name() for child in test_dir.children()]
+
+        assert subdir.delete(True) == 0
+        assert dir_name not in [child.object_name() for child in test_dir.children()]
