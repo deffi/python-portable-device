@@ -8,6 +8,8 @@ from comtypes.automation import VT_LPWSTR
 from portable_device_api import (definitions, PortableDeviceKeyCollection, PropertyKey, PortableDeviceValues,
                                  PortableDevicePropVariantCollection, PropVariant, errors)
 
+from portable_device import ObjectList
+
 if TYPE_CHECKING:
     from portable_device import Device
 
@@ -30,12 +32,16 @@ class Object:
         keys.add(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME)
         return self._properties.get_values(self._object_id, keys).get_string_value(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME)
 
-    def children(self) -> Iterator[Self]:
+    def _children(self) -> Iterator[Self]:
         enum_object_ids = self._content.enum_objects(self._object_id)
 
         while object_ids := enum_object_ids.next(1):
             for object_id in object_ids:
                 yield Object(self._device, object_id)
+
+    # TODO a custom generator would be nicer
+    def children(self) -> ObjectList:
+        return ObjectList(self._children())
 
     def walk(self, *, depth = 0) -> Iterator[tuple[int, Self]]:
         yield depth, self

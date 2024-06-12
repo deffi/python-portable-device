@@ -26,7 +26,9 @@ def test_dir() -> Object:
     device = Device.by_description(device_description, description_map=lambda x:x)
     with device:
         device_object = device.device_object
-        root = next(device_object.children())  # TODO ensure that there is only one
+        children = device_object.children()
+        assert len(children) == 1
+        root = children[0]
         base = root.get_child_by_name(base_name)
 
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
