@@ -78,3 +78,13 @@ class TestObject:
         assert definitions.WPD_OBJECT_CONTENT_TYPE in supported_properties
         assert definitions.WPD_OBJECT_DATE_CREATED in supported_properties
 
+    @pytest.mark.device
+    def test_get_properties(self, test_dir):
+        content_type, date_created = test_dir.get_properties([
+            definitions.WPD_OBJECT_CONTENT_TYPE,
+            definitions.WPD_OBJECT_DATE_CREATED,
+        ])
+
+        assert content_type == definitions.WPD_CONTENT_TYPE_FOLDER  # TODO also test a file
+        assert isinstance(date_created, datetime)
+        assert abs(date_created - datetime.now()).total_seconds() < 60  # Less than a minute
