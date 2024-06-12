@@ -71,6 +71,7 @@ class Object:
 
         return type(self)(self._device, self._content.create_object_with_properties_only(values))
 
+    # TODO simplify using children()
     def get_child_by_name(self, child_name: str) -> Self:
         object_ids = self._content.enum_objects(self._object_id).next(999)  # TODO arbitrary number
         keys = PortableDeviceKeyCollection.create()
