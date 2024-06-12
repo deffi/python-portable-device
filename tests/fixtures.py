@@ -17,6 +17,7 @@ def device():
     return matching_devices[0]
 
 
+# TODO sometimes, we find that it already exists - shouldn't that be prevented by the session scope?
 @pytest.fixture(scope = "session")
 def test_dir() -> Object:
     # TODO duplication in parsing the string
