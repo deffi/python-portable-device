@@ -133,3 +133,10 @@ class Object:
         supported_properties = self._properties.get_supported_properties(self._object_id)
         return [supported_properties.get_at(i) for i in range(supported_properties.get_count())]
 
+    def property_attributes(self, property: PropertyKey) -> dict:  # TODO more specific
+        attributes = self._properties.get_property_attributes(self._object_id, property)
+        result = {}
+        for i in range(attributes.get_count()):
+            key, value = attributes.get_at(i)
+            result[key] = value.value
+        return result

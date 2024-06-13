@@ -88,3 +88,9 @@ class TestObject:
         assert content_type == definitions.WPD_CONTENT_TYPE_FOLDER  # TODO also test a file
         assert isinstance(date_created, datetime)
         assert abs(date_created - datetime.now()).total_seconds() < 60  # Less than a minute
+
+    @pytest.mark.device
+    def test_property_attributes(self, test_dir):
+        attributes = test_dir.property_attributes(definitions.WPD_OBJECT_CONTENT_TYPE)
+        assert attributes[definitions.WPD_PROPERTY_ATTRIBUTE_CAN_READ] is True
+        assert attributes[definitions.WPD_PROPERTY_ATTRIBUTE_CAN_WRITE] is False
