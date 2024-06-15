@@ -44,7 +44,7 @@ class TestObject:
         assert test_dir.get_child_by_name(file_name).object_id == file.object_id
 
         # Download the file
-        assert file.download() == content
+        assert file.download_all() == content
         assert file_name in test_dir.children().object_names()
 
         # Remove the file

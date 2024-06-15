@@ -121,8 +121,8 @@ class Object:
 
         return type(self)(self._device, stream.get_object_id())
 
-    # TODO rename
-    def download(self) -> bytes:
+    # TODO allow canceling by yielding the chunks and reacting to GeneratorExit (user calling .close())
+    def download_all(self) -> bytes:
         stream, optimal_transfer_size = self._content.transfer().get_stream(self._object_id)
         buffer = bytearray()
         while chunk := stream.remote_read(optimal_transfer_size):
