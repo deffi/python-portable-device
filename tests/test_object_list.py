@@ -30,6 +30,6 @@ class TestObjectList:
         # Remove the directories again (they're missing now)
         delete_result = children.delete(False)
         # TODO own error reporting
-        assert delete_result == [errors.ERROR_FILE_NOT_FOUND] * len(dir_names)
+        assert delete_result == [errors.ERROR_FILE_NOT_FOUND] * len(dir_names) or delete_result == [errors.E_MTP_INVALID_OBJECT_HANDLE] * len(dir_names)
         for dir_name in dir_names:
             assert dir_name not in test_dir.children().object_names()

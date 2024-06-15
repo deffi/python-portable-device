@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterator, Iterable, Sequence, Generator
 from typing import TYPE_CHECKING, Self
 
+from comtypes import COMError
 from comtypes.automation import VT_LPWSTR
 
 from portable_device_api import (definitions, PortableDeviceKeyCollection, PropertyKey, PortableDeviceValues,
@@ -28,6 +29,11 @@ class Object:
 
     # TODO test that it can be changed or cache it
     def object_name(self) -> str:
+        keys = PortableDeviceKeyCollection.create()
+        keys.add(definitions.WPD_OBJECT_NAME)
+        return self._properties.get_values(self._object_id, keys).get_string_value(definitions.WPD_OBJECT_NAME)
+
+    def object_original_file_name(self) -> str:
         keys = PortableDeviceKeyCollection.create()
         keys.add(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME)
         return self._properties.get_values(self._object_id, keys).get_string_value(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME)
@@ -77,31 +83,30 @@ class Object:
 
         return type(self)(self._device, self._content.create_object_with_properties_only(values))
 
-    def effective_name(self) -> str:
-        keys = PortableDeviceKeyCollection.create()
-        keys.add(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME)
-        keys.add(definitions.WPD_OBJECT_NAME)
+    # def effective_name(self) -> str:
+    #     keys = PortableDeviceKeyCollection.create()
+    #     keys.add(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME)
+    #     keys.add(definitions.WPD_OBJECT_NAME)
+    #
+    #     properties = self._properties.get_values(self._object_id, keys)
+    #
+    #     try:
+    #         object_original_file_name = properties.get_string_value(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME)
+    #         if object_original_file_name:
+    #             return object_original_file_name
+    #     except COMError as e:
+    #         if errors.to_hresult(e.hresult) == errors.ERROR_NOT_FOUND:
+    #             pass
+    #         else:
+    #             raise
+    #
+    #     return properties.get_string_value(definitions.WPD_OBJECT_NAME)
 
-        properties = self._properties.get_values(self._object_id, keys)
-
-        object_original_file_name = properties.get_string_value(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME)
-        if object_original_file_name:
-            return object_original_file_name
-        else:
-            return properties.get_string_value(definitions.WPD_OBJECT_NAME)
-
-    # TODO simplify using children()
-    def get_child_by_name(self, child_name: str) -> Self:
-        matching_children = [child for child in self.children() if child.effective_name() == child_name]
-        # TOOD handle not found
-        assert len(matching_children) == 1
-        return matching_children[0]
-
-    def get_child_by_path(self, child_path: list[str]) -> Self:
+    def child_by_path(self, child_path: list[str]) -> Self:
         current = self
 
         for child_name in child_path:
-            current = current.get_child_by_name(child_name)
+            current = current.children().by_object_original_file_name(child_name)
 
         return current
 

@@ -1,7 +1,7 @@
 # TODO an ObjectGenerator might be better
 
 from collections.abc import Iterator
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Self
 
 from comtypes.automation import VT_LPWSTR
 
@@ -16,6 +16,21 @@ class ObjectList(list["Object"]):
     def object_names(self) -> Iterator[str]:
         for object_ in self:
             yield object_.object_name()
+
+    # TODO rename to file_names everywhere?
+    def object_orignal_file_names(self) -> Iterator[str]:
+        for object_ in self:
+            yield object_.object_original_file_name()
+
+    def by_object_name(self, object_name: str) -> "Object":
+        matching_objects = [o for o in self if o.object_name() == object_name]
+        assert len(matching_objects) == 1
+        return matching_objects[0]
+
+    def by_object_original_file_name(self, object_original_file_name: str) -> "Object":
+        matching_objects = [o for o in self if o.object_original_file_name() == object_original_file_name]
+        assert len(matching_objects) == 1
+        return matching_objects[0]
 
     # TODO is this faster than deleting individually?
     # TODO expected result is [0] * len(object_ids)

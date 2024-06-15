@@ -21,15 +21,21 @@ def device():
 def test_dir() -> Object:
     # TODO duplication in parsing the string
     # TODO use device fixture instead
-    device_description, *base_name = os.environ["PORTABLE_DEVICE_TEST_PATH"].split("/")
+    device_description, *base_path = os.environ["PORTABLE_DEVICE_TEST_PATH"].split("/")
 
     device = Device.by_description(device_description, description_map=lambda x:x)
     with device:
-        device_object = device.device_object
-        children = device_object.children()
-        assert len(children) == 1
-        root = children[0]
-        base = root.get_child_by_path(base_name)
+        # device_object = device.device_object
+        # children = device_object.children()
+        # assert len(children) == 1
+        # root = children[0]
+        # base = device_object.get_child_by_path(base_name)
+
+        # matching_root_objects = device.root_objects.by_object_name(base_name[0])
+        # assert len(matching_root_objects) == 1
+
+        base = device.object_by_path(base_path)
+
 
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 

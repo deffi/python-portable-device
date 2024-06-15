@@ -4,7 +4,7 @@ from portable_device_api import (PortableDeviceManager, PortableDevice, Portable
                                  definitions)
 from typing import Self
 
-from portable_device import Object
+from portable_device import Object, ObjectList
 from portable_device.exceptions import DeviceNotFound
 
 
@@ -104,6 +104,17 @@ class Device:
     @cache
     def device_object(self) -> Object:
         return Object(self, definitions.WPD_DEVICE_OBJECT_ID)
+
+    @property
+    @cache
+    def root_objects(self) -> ObjectList:
+        return self.device_object.children()
+
+    def object_by_path(self, path: list[str]) -> Object:
+        if path:
+            return self.root_objects.by_object_name(path[0]).child_by_path(path[1:])
+        else:
+            return self.device_object
 
     def walk(self, depth = 0) -> Iterator[tuple[int, Object]]:
         yield from self.device_object.walk(depth = 0)

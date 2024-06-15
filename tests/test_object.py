@@ -29,7 +29,7 @@ class TestObject:
         # Remove the directory again (it's missing now)
         delete_result = directory.delete(False)
         # TODO own error reporting
-        assert delete_result == errors.ERROR_FILE_NOT_FOUND
+        assert delete_result == errors.ERROR_FILE_NOT_FOUND or delete_result == errors.E_MTP_INVALID_OBJECT_HANDLE
         assert dir_name not in test_dir.children().object_names()
 
     @pytest.mark.device
@@ -40,12 +40,12 @@ class TestObject:
 
         # Create the file
         file = test_dir.upload_file(file_name, content)
-        assert file_name in test_dir.children().object_names()
-        assert test_dir.get_child_by_name(file_name).object_id == file.object_id
+        assert file_name in test_dir.children().object_orignal_file_names()
+        assert test_dir.children().by_object_original_file_name(file_name).object_id == file.object_id
 
         # Download the file
         assert file.download_all() == content
-        assert file_name in test_dir.children().object_names()
+        assert file_name in test_dir.children().object_orignal_file_names()
 
         # Remove the file
         delete_result = file.delete(False)
@@ -54,8 +54,30 @@ class TestObject:
 
         # Remove the file again (it's missing now)
         delete_result = file.delete(False)
-        assert delete_result == errors.ERROR_FILE_NOT_FOUND
+        assert delete_result == errors.ERROR_FILE_NOT_FOUND or delete_result == errors.E_MTP_INVALID_OBJECT_HANDLE
         assert file_name not in test_dir.children().object_names()
+
+    @pytest.mark.device
+    def test_move_file(self, test_dir):
+        file_name = "file"
+        content = b"foobar"
+
+        source = test_dir.create_directory("source")
+        target = test_dir.create_directory("target")
+
+        file = source.upload_file(file_name, content)
+        assert file_name in source.children().object_names()
+        assert file_name not in target.children().object_names()
+
+        file.move_into(target)
+        assert file_name not in source.children().object_names()
+        assert file_name in target.children().object_names()
+
+        assert target.children().by_object_original_file_name(file_name).object_id == file.object_id
+        assert file.download_all() == content
+
+        source.delete(recursive=True)
+        target.delete(recursive=True)
 
     @pytest.mark.device
     def test_download(self, test_dir):
@@ -65,8 +87,8 @@ class TestObject:
 
         # Create the file
         file = test_dir.upload_file(file_name, content)
-        assert file_name in test_dir.children().object_names()
-        assert test_dir.get_child_by_name(file_name).object_id == file.object_id
+        assert file_name in test_dir.children().object_orignal_file_names()
+        assert test_dir.children().by_object_original_file_name(file_name).object_id == file.object_id
 
         # Download the file
         download = file.download(chunk_size=3)
@@ -75,7 +97,7 @@ class TestObject:
         assert next(download) == b"x"
         with pytest.raises(StopIteration):
             next(download)
-        assert file_name in test_dir.children().object_names()
+        assert file_name in test_dir.children().object_orignal_file_names()
 
         # Remove the file
         delete_result = file.delete(False)
@@ -84,7 +106,7 @@ class TestObject:
 
         # Remove the file again (it's missing now)
         delete_result = file.delete(False)
-        assert delete_result == errors.ERROR_FILE_NOT_FOUND
+        assert delete_result == errors.ERROR_FILE_NOT_FOUND or delete_result == errors.E_MTP_INVALID_OBJECT_HANDLE
         assert file_name not in test_dir.children().object_names()
 
     @pytest.mark.device
@@ -95,14 +117,14 @@ class TestObject:
 
         # Create the file
         file = test_dir.upload_file(file_name, content)
-        assert file_name in test_dir.children().object_names()
-        assert test_dir.get_child_by_name(file_name).object_id == file.object_id
+        assert file_name in test_dir.children().object_orignal_file_names()
+        assert test_dir.children().by_object_original_file_name(file_name).object_id == file.object_id
 
         # Download the file
         download = file.download(chunk_size=3)
         assert next(download) == b"foo"
         download.close()
-        assert file_name in test_dir.children().object_names()
+        assert file_name in test_dir.children().object_orignal_file_names()
 
         # Remove the file
         delete_result = file.delete(False)
@@ -111,7 +133,7 @@ class TestObject:
 
         # Remove the file again (it's missing now)
         delete_result = file.delete(False)
-        assert delete_result == errors.ERROR_FILE_NOT_FOUND
+        assert delete_result == errors.ERROR_FILE_NOT_FOUND or delete_result == errors.E_MTP_INVALID_OBJECT_HANDLE
         assert file_name not in test_dir.children().object_names()
 
     @pytest.mark.device
@@ -133,7 +155,8 @@ class TestObject:
     def test_supported_properties(self, test_dir):
         supported_properties = test_dir.supported_properties()
         assert definitions.WPD_OBJECT_CONTENT_TYPE in supported_properties
-        assert definitions.WPD_OBJECT_DATE_CREATED in supported_properties
+        # Not supported by MTP Android device
+        #assert definitions.WPD_OBJECT_DATE_CREATED in supported_properties
 
     @pytest.mark.device
     def test_get_properties(self, test_dir):
@@ -143,8 +166,9 @@ class TestObject:
         ])
 
         assert content_type == definitions.WPD_CONTENT_TYPE_FOLDER  # TODO also test a file
-        assert isinstance(date_created, datetime)
-        assert abs(date_created - datetime.now()).total_seconds() < 60  # Less than a minute
+        # TODO re-enable where supported by driver (not for MTP Android)
+        #assert isinstance(date_created, datetime)
+        #assert abs(date_created - datetime.now()).total_seconds() < 60  # Less than a minute
 
     @pytest.mark.device
     def test_property_attributes(self, test_dir):
