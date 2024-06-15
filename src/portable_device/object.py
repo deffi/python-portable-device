@@ -122,6 +122,7 @@ class Object:
         return type(self)(self._device, stream.get_object_id())
 
     # TODO allow canceling by yielding the chunks and reacting to GeneratorExit (user calling .close())
+    # You must exhaust the iterator, or you won't be be able to delte the file
     def download(self, chunk_size: int | None = None) -> Iterator[bytes]:
         stream, optimal_transfer_size = self._content.transfer().get_stream(self._object_id)
 
