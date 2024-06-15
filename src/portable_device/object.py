@@ -131,9 +131,9 @@ class Object:
         while chunk := stream.remote_read(chunk_size):
             yield chunk
 
-    def download_all(self) -> bytes:
+    def download_all(self, chunk_size: int | None = None) -> bytes:
         buffer = bytearray()
-        for chunk in self.download(None):
+        for chunk in self.download(chunk_size):
             buffer.extend(chunk)
         return buffer
 
