@@ -77,15 +77,25 @@ class Object:
 
         return type(self)(self._device, self._content.create_object_with_properties_only(values))
 
-    # TODO simplify using children()
-    def get_child_by_name(self, child_name: str) -> Self:
-        object_ids = self._content.enum_objects(self._object_id).next(999)  # TODO arbitrary number
+    def effective_name(self) -> str:
         keys = PortableDeviceKeyCollection.create()
         keys.add(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME)
-        matching_object_ids = [oid for oid in object_ids if self._properties.get_values(oid, keys).get_string_value(
-            definitions.WPD_OBJECT_ORIGINAL_FILE_NAME) == child_name]
-        assert len(matching_object_ids) == 1
-        return type(self)(self._device, matching_object_ids[0])
+        keys.add(definitions.WPD_OBJECT_NAME)
+
+        properties = self._properties.get_values(self._object_id, keys)
+
+        object_original_file_name = properties.get_string_value(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME)
+        if object_original_file_name:
+            return object_original_file_name
+        else:
+            return properties.get_string_value(definitions.WPD_OBJECT_NAME)
+
+    # TODO simplify using children()
+    def get_child_by_name(self, child_name: str) -> Self:
+        matching_children = [child for child in self.children() if child.effective_name() == child_name]
+        # TOOD handle not found
+        assert len(matching_children) == 1
+        return matching_children[0]
 
     def delete(self, recursive: bool):
         object_ids_pvc = PortableDevicePropVariantCollection.create()
@@ -101,6 +111,15 @@ class Object:
         assert delete_result.get_count() == 1
         # TODO exception if the hresult is not 0
         return errors.to_hresult(delete_result.get_at(0).value)
+
+    def move_into(self, target: Object):
+        # TODO multi-move
+        object_ids_pvc = PortableDevicePropVariantCollection.create()
+        object_ids_pvc.add(PropVariant.create(VT_LPWSTR, self._object_id))
+
+        move_result = self._content.move(object_ids_pvc, target.object_id)
+        assert move_result.get_count() == 1
+        return errors.to_hresult(move_result.get_at(0).value)
 
     # TODO rename
     def upload_file(self, file_name: str, content: bytes) -> Self:
