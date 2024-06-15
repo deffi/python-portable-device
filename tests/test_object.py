@@ -88,6 +88,33 @@ class TestObject:
         assert file_name not in test_dir.children().object_names()
 
     @pytest.mark.device
+    def test_download_cancel(self, test_dir):
+        content = b"foobarx"
+        file_name = "upload.txt"
+        assert file_name not in test_dir.children().object_names()
+
+        # Create the file
+        file = test_dir.upload_file(file_name, content)
+        assert file_name in test_dir.children().object_names()
+        assert test_dir.get_child_by_name(file_name).object_id == file.object_id
+
+        # Download the file
+        download = file.download(chunk_size=3)
+        assert next(download) == b"foo"
+        download.close()
+        assert file_name in test_dir.children().object_names()
+
+        # Remove the file
+        delete_result = file.delete(False)
+        assert delete_result == 0
+        assert file_name not in test_dir.children().object_names()
+
+        # Remove the file again (it's missing now)
+        delete_result = file.delete(False)
+        assert delete_result == errors.ERROR_FILE_NOT_FOUND
+        assert file_name not in test_dir.children().object_names()
+
+    @pytest.mark.device
     def test_recursive_delete(self, test_dir):
         dir_name = "foo"
         assert dir_name not in test_dir.children().object_names()

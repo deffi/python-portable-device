@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Iterator, Iterable, Sequence
+from collections.abc import Iterator, Iterable, Sequence, Generator
 from typing import TYPE_CHECKING, Self
 
 from comtypes.automation import VT_LPWSTR
@@ -121,16 +121,26 @@ class Object:
 
         return type(self)(self._device, stream.get_object_id())
 
-    # TODO allow canceling by yielding the chunks and reacting to GeneratorExit (user calling .close())
-    # You must exhaust the iterator, or you won't be be able to delte the file
-    def download(self, chunk_size: int | None = None) -> Iterator[bytes]:
+    # You must exhaust or close the iterator, or you won't be able to delete
+    # the file
+    def download(self, chunk_size: int | None = None) -> Generator[bytes]:
         stream, optimal_transfer_size = self._content.transfer().get_stream(self._object_id)
 
         if chunk_size is None:
             chunk_size = optimal_transfer_size
 
         while chunk := stream.remote_read(chunk_size):
-            yield chunk
+            try:
+                yield chunk
+            except GeneratorExit:
+                # Does not seem necessary
+                stream.cancel()
+
+                # Seems necessary if `stream` doesn't go out of scope before the
+                # next operation
+                del stream
+
+                break
 
     def download_all(self, chunk_size: int | None = None) -> bytes:
         buffer = bytearray()
