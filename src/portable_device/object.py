@@ -122,10 +122,18 @@ class Object:
         return type(self)(self._device, stream.get_object_id())
 
     # TODO allow canceling by yielding the chunks and reacting to GeneratorExit (user calling .close())
-    def download_all(self) -> bytes:
+    def download(self, chunk_size: int | None = None) -> Iterator[bytes]:
         stream, optimal_transfer_size = self._content.transfer().get_stream(self._object_id)
+
+        if chunk_size is None:
+            chunk_size = optimal_transfer_size
+
+        while chunk := stream.remote_read(chunk_size):
+            yield chunk
+
+    def download_all(self) -> bytes:
         buffer = bytearray()
-        while chunk := stream.remote_read(optimal_transfer_size):
+        for chunk in self.download(None):
             buffer.extend(chunk)
         return buffer
 
