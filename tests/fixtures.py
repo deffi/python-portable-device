@@ -9,7 +9,7 @@ from portable_device import Device, Object
 @pytest.fixture(scope = "session")
 def device():
     # TODO support subdirectories or document that we don't
-    device_description, base_name = os.environ["PORTABLE_DEVICE_TEST_PATH"].split("/")
+    device_description, *base_path = os.environ["PORTABLE_DEVICE_TEST_PATH"].split("/")
 
     devices = list(Device.all(refresh=True))
     matching_devices = [device for device in devices if device.description == device_description]
@@ -21,7 +21,7 @@ def device():
 def test_dir() -> Object:
     # TODO duplication in parsing the string
     # TODO use device fixture instead
-    device_description, base_name = os.environ["PORTABLE_DEVICE_TEST_PATH"].split("/")
+    device_description, *base_name = os.environ["PORTABLE_DEVICE_TEST_PATH"].split("/")
 
     device = Device.by_description(device_description, description_map=lambda x:x)
     with device:
@@ -29,7 +29,7 @@ def test_dir() -> Object:
         children = device_object.children()
         assert len(children) == 1
         root = children[0]
-        base = root.get_child_by_name(base_name)
+        base = root.get_child_by_path(base_name)
 
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 

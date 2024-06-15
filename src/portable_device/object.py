@@ -97,6 +97,14 @@ class Object:
         assert len(matching_children) == 1
         return matching_children[0]
 
+    def get_child_by_path(self, child_path: list[str]) -> Self:
+        current = self
+
+        for child_name in child_path:
+            current = current.get_child_by_name(child_name)
+
+        return current
+
     def delete(self, recursive: bool):
         object_ids_pvc = PortableDevicePropVariantCollection.create()
         # TODO multi-delete
