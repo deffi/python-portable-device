@@ -41,8 +41,6 @@ class Object:
           * get_string_value -> gets a string
           * get_value -> gets a PropVariant, use .value for the actual value
         """
-        keys = list(keys)
-
         key_collection = PortableDeviceKeyCollection.create()
         for key in keys:
             key_collection.add(key)
