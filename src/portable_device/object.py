@@ -180,10 +180,5 @@ class Object:
         return ObjectList([self]).delete(recursive)[0]
 
     def move_into(self, target: Object):
-        # TODO multi-move
-        object_ids_pvc = PortableDevicePropVariantCollection.create()
-        object_ids_pvc.add(PropVariant.create(VT_LPWSTR, self._object_id))
-
-        move_result = self._content.move(object_ids_pvc, target.object_id)
-        assert move_result.get_count() == 1
-        return errors.to_hresult(move_result.get_at(0).value)
+        # TODO exception if the result is not 0
+        return ObjectList([self]).move_into(target)[0]

@@ -48,4 +48,16 @@ class ObjectList(list["Object"]):
         # TODO will fail for empty lists
         # TODO assert that all contents are the same (or group)
         delete_result = self[0]._content.delete(flags, object_ids_pvc)
+        assert delete_result.get_count() == len(self)
         return [errors.to_hresult(delete_result.get_at(i).value) for i in range(delete_result.get_count())]
+
+    def move_into(self, target: "Object"):
+        # TODO multi-move
+        object_ids_pvc = PortableDevicePropVariantCollection.create()
+        for object_ in self:
+            object_ids_pvc.add(PropVariant.create(VT_LPWSTR, object_.object_id))
+
+        # TODO assert that all contents are the same (or group)
+        move_result = self[0]._content.move(object_ids_pvc, target.object_id)
+        assert move_result.get_count() == len(self)
+        return [errors.to_hresult(move_result.get_at(i).value) for i in range(move_result.get_count())]
