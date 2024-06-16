@@ -119,21 +119,20 @@ class Device:
     def device_object(self) -> Object:
         return Object(self, definitions.WPD_DEVICE_OBJECT_ID)
 
-    @property
     def root_objects(self) -> ObjectList:
         return self.device_object.children()
 
     def root_object(self, name: str) -> Object:
         if name:
             # Select root object by name
-            return self.root_objects.by_object_name(name)
+            return self.root_objects().by_object_name(name)
         else:
             # Select the only root object
-            root_objects = self.root_objects
+            root_objects = self.root_objects()
             if len(root_objects) == 0:
                 raise ObjectNotFound(None)
             elif len(root_objects) == 1:
-                return self.root_objects[0]
+                return root_objects[0]
             else:
                 raise AmbiguousObject(None)
 

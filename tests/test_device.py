@@ -95,13 +95,13 @@ class TestDevice:
     def test_root_objects(self, device):
         # TODO document what happens if it's not open, or detect and throw exception
         with device:
-            for object_ in device.root_objects:
+            for object_ in device.root_objects():
                 assert isinstance(object_, Object)
 
     @pytest.mark.device
     def test_root_object_by_name(self, device):
         with device:
-            root_object = device.root_objects[0]
+            root_object = device.root_objects()[0]
             other = device.root_object(root_object.object_name())
             assert other.object_id == root_object.object_id
 
@@ -124,7 +124,7 @@ class TestDevice:
     @pytest.mark.device
     def test_object_by_path_root_object(self, device):
         with device:
-            root_object = device.root_objects[0]
+            root_object = device.root_objects()[0]
             assert device.object_by_path([root_object.object_name()]).object_id == root_object.object_id
 
     @pytest.mark.device
