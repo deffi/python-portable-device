@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator, Iterable, Sequence, Generator
+from functools import cache
 from typing import TYPE_CHECKING, Self
 
 from comtypes import COMError
@@ -20,14 +21,25 @@ class Object:
         self._device = device
         self._object_id = object_id
 
-        self._content = self._device._content
-        self._properties = self._device._properties
-
     # Properties ###############################################################
+
+    @property
+    def device(self) -> Device:
+        return self._device
 
     @property
     def object_id(self) -> str:
         return self._object_id
+
+    @property
+    @cache
+    def _content(self):
+        return self._device._content
+
+    @property
+    @cache
+    def _properties(self):
+        return self._device._properties
 
     # Object properties ########################################################
 
