@@ -28,32 +28,32 @@ class Device:
             yield cls(device_id)
 
     @classmethod
+    def find(cls, filter_: Callable[["Device"], bool], /, reference: str, *, refresh = True):
+        matching_devices = [device for device in cls.all(refresh=refresh) if filter_(device)]
+
+        if len(matching_devices) == 0:
+            raise DeviceNotFound(reference)
+        elif len(matching_devices) == 1:
+            return matching_devices[0]
+        else:
+            raise AmbiguousDevice(reference)
+
+    @classmethod
     def by_description(cls, description: str, *,
                        refresh = True, ignore_trailing_space: bool = True) -> Self:
 
         description_map = str.rstrip if ignore_trailing_space else str
-        matching_devices = [device for device in cls.all(refresh=refresh)
-                            if description_map(device.description) == description_map(description)]
+        description = description_map(description)
 
-        if len(matching_devices) == 0:
-            raise DeviceNotFound(description)
-        elif len(matching_devices) == 1:
-            return matching_devices[0]
-        else:
-            raise AmbiguousDevice(description)
+        return cls.find(lambda d: description_map(d.description) == description,
+                        reference = description,
+                        refresh = refresh)
 
     @classmethod
     def by_friendly_name(cls, friendly_name: str, *, refresh = True) -> Self:
-        all_devices = cls.all(refresh=refresh)
-        matching_devices = [device for device in all_devices
-                            if device.friendly_name == friendly_name]
-
-        if len(matching_devices) == 0:
-            raise DeviceNotFound(friendly_name)
-        elif len(matching_devices) == 1:
-            return matching_devices[0]
-        else:
-            raise AmbiguousDevice(friendly_name)
+        return cls.find(lambda d: d.friendly_name == friendly_name,
+                        reference = friendly_name,
+                        refresh = refresh)
 
     # Open #####################################################################
 
