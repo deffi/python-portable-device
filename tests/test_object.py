@@ -10,8 +10,44 @@ from fixtures import test_dir
 
 
 class TestObject:
+    # Properties ###############################################################
+
+    # Object properties ########################################################
+
+    @pytest.mark.device
+    def test_supported_properties(self, test_dir: Object):
+        supported_properties = test_dir.supported_properties()
+        assert definitions.WPD_OBJECT_NAME in supported_properties
+        assert definitions.WPD_OBJECT_CONTENT_TYPE in supported_properties
+        assert definitions.WPD_OBJECT_PARENT_ID in supported_properties  # TODO getting the parent
+
+    @pytest.mark.device
+    def test_get_properties(self, test_dir):
+        properties = test_dir.get_properties([definitions.WPD_OBJECT_NAME,
+                                              definitions.WPD_OBJECT_CONTENT_TYPE])
+
+        assert definitions.WPD_OBJECT_NAME in properties
+        assert definitions.WPD_OBJECT_CONTENT_TYPE in properties
+
+        assert properties[definitions.WPD_OBJECT_CONTENT_TYPE] == definitions.WPD_CONTENT_TYPE_FOLDER
+        # TODO also test the content type of a file
+
     def test_object_name(self, test_dir: Object):
         assert re.fullmatch(r'\d\d\d\d-\d\d-\d\d_\d\d-\d\d-\d\d', test_dir.object_name())
+
+    def test_file_name(self, test_dir: Object):
+        assert re.fullmatch(r'\d\d\d\d-\d\d-\d\d_\d\d-\d\d-\d\d', test_dir.file_name())
+
+    # Object property attributes ###############################################
+
+    @pytest.mark.device
+    def test_property_attributes(self, test_dir):
+        attributes = test_dir.property_attributes(definitions.WPD_OBJECT_CONTENT_TYPE)
+        assert attributes[definitions.WPD_PROPERTY_ATTRIBUTE_CAN_READ] is True
+        assert attributes[definitions.WPD_PROPERTY_ATTRIBUTE_CAN_WRITE] is False
+
+    # Children #################################################################
+    # Child creation ###########################################################
 
     @pytest.mark.device
     def test_create_remove_dir(self, test_dir):
@@ -57,27 +93,7 @@ class TestObject:
         assert delete_result == errors.ERROR_FILE_NOT_FOUND or delete_result == errors.E_MTP_INVALID_OBJECT_HANDLE
         assert file_name not in test_dir.children().object_names()
 
-    @pytest.mark.device
-    def test_move_file(self, test_dir):
-        file_name = "file"
-        content = b"foobar"
-
-        source = test_dir.create_directory("source")
-        target = test_dir.create_directory("target")
-
-        file = source.upload_file(file_name, content)
-        assert file_name in source.children().object_names()
-        assert file_name not in target.children().object_names()
-
-        file.move_into(target)
-        assert file_name not in source.children().object_names()
-        assert file_name in target.children().object_names()
-
-        assert target.children().by_file_name(file_name).object_id == file.object_id
-        assert file.download_all() == content
-
-        source.delete(recursive=True)
-        target.delete(recursive=True)
+    # Download #################################################################
 
     @pytest.mark.device
     def test_download(self, test_dir):
@@ -136,6 +152,9 @@ class TestObject:
         assert delete_result == errors.ERROR_FILE_NOT_FOUND or delete_result == errors.E_MTP_INVALID_OBJECT_HANDLE
         assert file_name not in test_dir.children().object_names()
 
+
+    # Modification #############################################################
+
     @pytest.mark.device
     def test_recursive_delete(self, test_dir):
         dir_name = "foo"
@@ -152,26 +171,23 @@ class TestObject:
         assert dir_name not in test_dir.children().object_names()
 
     @pytest.mark.device
-    def test_supported_properties(self, test_dir):
-        supported_properties = test_dir.supported_properties()
-        assert definitions.WPD_OBJECT_CONTENT_TYPE in supported_properties
-        # Not supported by MTP Android device
-        #assert definitions.WPD_OBJECT_DATE_CREATED in supported_properties
+    def test_move_file(self, test_dir):
+        file_name = "file"
+        content = b"foobar"
 
-    @pytest.mark.device
-    def test_get_properties(self, test_dir):
-        content_type, date_created = test_dir.get_properties([
-            definitions.WPD_OBJECT_CONTENT_TYPE,
-            definitions.WPD_OBJECT_DATE_CREATED,
-        ]).values()
+        source = test_dir.create_directory("source")
+        target = test_dir.create_directory("target")
 
-        assert content_type == definitions.WPD_CONTENT_TYPE_FOLDER  # TODO also test a file
-        # TODO re-enable where supported by driver (not for MTP Android)
-        #assert isinstance(date_created, datetime)
-        #assert abs(date_created - datetime.now()).total_seconds() < 60  # Less than a minute
+        file = source.upload_file(file_name, content)
+        assert file_name in source.children().object_names()
+        assert file_name not in target.children().object_names()
 
-    @pytest.mark.device
-    def test_property_attributes(self, test_dir):
-        attributes = test_dir.property_attributes(definitions.WPD_OBJECT_CONTENT_TYPE)
-        assert attributes[definitions.WPD_PROPERTY_ATTRIBUTE_CAN_READ] is True
-        assert attributes[definitions.WPD_PROPERTY_ATTRIBUTE_CAN_WRITE] is False
+        file.move_into(target)
+        assert file_name not in source.children().object_names()
+        assert file_name in target.children().object_names()
+
+        assert target.children().by_file_name(file_name).object_id == file.object_id
+        assert file.download_all() == content
+
+        source.delete(recursive=True)
+        target.delete(recursive=True)
