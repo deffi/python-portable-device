@@ -31,26 +31,26 @@ class Object:
 
     # Object properties ########################################################
 
-    # TODO test that it can be changed or cache it
-    def object_name(self) -> str:
-        keys = PortableDeviceKeyCollection.create()
-        keys.add(definitions.WPD_OBJECT_NAME)
-        return self._properties.get_values(self._object_id, keys).get_string_value(definitions.WPD_OBJECT_NAME)
+    def supported_properties(self) -> list[PropertyKey]:
+        supported_properties = self._properties.get_supported_properties(self._object_id)
+        return [supported_properties.get_at(i) for i in range(supported_properties.get_count())]
 
-    # TODO test that it can be changed or cache it
-    def file_name(self) -> str:
-        keys = PortableDeviceKeyCollection.create()
-        keys.add(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME)
-        return self._properties.get_values(self._object_id, keys).get_string_value(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME)
+    def _get_properties(self, keys: Iterable[PropertyKey]):
+        keys = list(keys)
 
-    def get_properties(self, keys: Sequence[PropertyKey]):
         key_collection = PortableDeviceKeyCollection.create()
         for key in keys:
             key_collection.add(key)
 
-        property_values = self._properties.get_values(self._object_id, key_collection)
+        return self._properties.get_values(self._object_id, key_collection)
 
-        # TODO if the key is not in the collection:
+    def get_properties(self, keys: Iterable[PropertyKey]):
+        keys = list(keys)
+
+        properties = self._get_properties(keys)
+
+        # TODO if the key is not in the collection (e. g. file name for device
+        # objects and root objects, or object name for device objects):
         #   * property_values.get_string_value raises get COMError (-2147023728 = 0x80070490 = ERROR_NOT_FOUND)
         #   * property_values.get_value returns -2147023728 instead, and v.VT is comtypes.automation.VT_ERROR
         # We can't easily use the former without exposing PortableDeviceValues
@@ -61,11 +61,13 @@ class Object:
         # (returns key, value) and check for presence ourselves.
         # Also explain this in portable_device_api.PortableDeviceValues
         # Or maybe we could embed the expected value in the PropertyKey
-        return [property_values.get_value(key).value for key in keys]
+        return [properties.get_value(key).value for key in keys]
 
-    def supported_properties(self) -> list[PropertyKey]:
-        supported_properties = self._properties.get_supported_properties(self._object_id)
-        return [supported_properties.get_at(i) for i in range(supported_properties.get_count())]
+    def object_name(self) -> str:
+        return self._get_properties([definitions.WPD_OBJECT_NAME]).get_string_value(definitions.WPD_OBJECT_NAME)
+
+    def file_name(self) -> str:
+        return self._get_properties([definitions.WPD_OBJECT_ORIGINAL_FILE_NAME]).get_string_value(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME)
 
     # Object property attributes ###############################################
 
