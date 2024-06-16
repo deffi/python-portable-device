@@ -11,7 +11,7 @@ from portable_device_api import (definitions, PortableDeviceKeyCollection, Prope
 
 from portable_device import ObjectList
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:    # pragma: no cover
     from portable_device import Device
 
 

@@ -8,7 +8,7 @@ from comtypes.automation import VT_LPWSTR
 from portable_device_api import (definitions, PortableDeviceKeyCollection, PropertyKey, PortableDeviceValues,
                                  PortableDevicePropVariantCollection, PropVariant, errors)
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from portable_device import Object
 
 
