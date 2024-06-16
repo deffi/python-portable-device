@@ -10,5 +10,7 @@ Error handling:
   * Creating a file/directory that already exists
 
 Tests:
+  * Tests for ObjectList
+  * Test accessing a non-existent child (ObjectNotFound exception)
   * Can we have multiple Object instances with the same object ID?
   * Can we have multiple Device instances with the same device ID?
