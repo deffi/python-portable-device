@@ -83,25 +83,6 @@ class Object:
 
         return type(self)(self._device, self._content.create_object_with_properties_only(values))
 
-    # def effective_name(self) -> str:
-    #     keys = PortableDeviceKeyCollection.create()
-    #     keys.add(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME)
-    #     keys.add(definitions.WPD_OBJECT_NAME)
-    #
-    #     properties = self._properties.get_values(self._object_id, keys)
-    #
-    #     try:
-    #         object_original_file_name = properties.get_string_value(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME)
-    #         if object_original_file_name:
-    #             return object_original_file_name
-    #     except COMError as e:
-    #         if errors.to_hresult(e.hresult) == errors.ERROR_NOT_FOUND:
-    #             pass
-    #         else:
-    #             raise
-    #
-    #     return properties.get_string_value(definitions.WPD_OBJECT_NAME)
-
     def child_by_path(self, child_path: list[str]) -> Self:
         current = self
 
