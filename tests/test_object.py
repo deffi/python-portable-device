@@ -19,7 +19,23 @@ class TestObject:
         supported_properties = test_dir.supported_properties()
         assert definitions.WPD_OBJECT_NAME in supported_properties
         assert definitions.WPD_OBJECT_CONTENT_TYPE in supported_properties
-        assert definitions.WPD_OBJECT_PARENT_ID in supported_properties  # TODO getting the parent
+        assert definitions.WPD_OBJECT_PARENT_ID in supported_properties
+
+    @pytest.mark.device
+    def test_supported_properties_of_root(self, device):
+        with device:
+            supported_properties = device.root_objects()[0].supported_properties()
+            assert definitions.WPD_OBJECT_NAME in supported_properties
+            assert definitions.WPD_OBJECT_CONTENT_TYPE in supported_properties
+            assert definitions.WPD_OBJECT_PARENT_ID in supported_properties
+
+    @pytest.mark.device
+    def test_supported_properties_of_device_object(self, device):
+        with device:
+            supported_properties = device.device_object.supported_properties()
+            assert definitions.WPD_OBJECT_NAME in supported_properties
+            assert definitions.WPD_OBJECT_CONTENT_TYPE in supported_properties
+            assert definitions.WPD_OBJECT_PARENT_ID in supported_properties
 
     @pytest.mark.device
     def test_get_properties(self, test_dir):
