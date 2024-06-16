@@ -46,13 +46,13 @@ class Device:
         description = description_map(description)
 
         return cls.find(lambda d: description_map(d.description) == description,
-                        reference = description,
+                        reference = repr(description),
                         refresh = refresh)
 
     @classmethod
     def by_friendly_name(cls, friendly_name: str, *, refresh = True) -> Self:
         return cls.find(lambda d: d.friendly_name == friendly_name,
-                        reference = friendly_name,
+                        reference = repr(friendly_name),
                         refresh = refresh)
 
     # Open #####################################################################

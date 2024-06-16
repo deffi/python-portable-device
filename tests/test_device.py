@@ -43,11 +43,20 @@ class TestDevice:
         assert isinstance(other, Device)
         assert other.device_id == device.device_id
 
+    def test_by_description_not_found(self):
+        with pytest.raises(DeviceNotFound, match = r"Device not found: 'mutakirorikatum'"):
+            Device.by_description("mutakirorikatum", ignore_trailing_space=False)
+
     @pytest.mark.device
     def test_by_friendly_name(self, device):
         other = Device.by_friendly_name(device.friendly_name)
         assert isinstance(other, Device)
         assert other.device_id == device.device_id
+
+    @pytest.mark.device
+    def test_by_friendly_name_not_found(self, device):
+        with pytest.raises(DeviceNotFound, match = r"Device not found: 'Mutakirorikatum'"):
+            Device.by_friendly_name("Mutakirorikatum")
 
     # Open #####################################################################
 
