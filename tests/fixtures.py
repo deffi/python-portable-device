@@ -23,7 +23,7 @@ def test_dir() -> Object:
     # TODO use device fixture instead
     device_description, *base_path = os.environ["PORTABLE_DEVICE_TEST_PATH"].split("/")
 
-    device = Device.by_description(device_description, description_map=lambda x:x)
+    device = Device.by_description(device_description.rstrip())
     with device:
         # device_object = device.device_object
         # children = device_object.children()

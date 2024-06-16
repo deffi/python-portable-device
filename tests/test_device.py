@@ -22,7 +22,7 @@ class TestDevice:
 
     @pytest.mark.device
     def test_by_description(self, device):
-        other = Device.by_description(device.description, description_map=str)
+        other = Device.by_description(device.description, ignore_trailing_space=False)
         assert other.device_id == device.device_id
 
     @pytest.mark.device

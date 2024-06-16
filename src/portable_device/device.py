@@ -31,13 +31,14 @@ class Device:
 
     @classmethod
     def by_description(cls, description: str, *,
-                       refresh = True, description_map: Callable[[str], str] = str.strip) -> Self:
+                       refresh = True, ignore_trailing_space: bool = True) -> Self:
         if refresh:
             _manager().refresh_device_list()
 
         for device_id in _manager().get_devices():
             this_device_description = _manager().get_device_description(device_id)
-            this_device_description = description_map(this_device_description)
+            if ignore_trailing_space:
+                this_device_description = this_device_description.rstrip()
 
             if this_device_description == description:
                 return Device(device_id)
