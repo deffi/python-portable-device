@@ -1,4 +1,4 @@
-from collections.abc import Iterator, Callable
+from collections.abc import Iterator, Callable, Iterable
 from functools import cache
 from portable_device_api import (PortableDeviceManager, PortableDevice, PortableDeviceContent, PortableDeviceProperties,
                                  definitions)
@@ -57,16 +57,20 @@ class Device:
 
     # Open #####################################################################
 
-    @property
-    @cache
-    def _device(self):
-        return PortableDevice.create()
-
     def open(self):
         self._device.open(self._device_id)
 
     def close(self):
         self._device.close()
+
+    # Context manager ##########################################################
+
+    def __enter__(self):
+        self.open()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
 
     # Properties ###############################################################
 
@@ -95,6 +99,11 @@ class Device:
 
     @property
     @cache
+    def _device(self):
+        return PortableDevice.create()
+
+    @property
+    @cache
     def _content(self) -> PortableDeviceContent:
         return self._device.content()
 
@@ -111,7 +120,6 @@ class Device:
         return Object(self, definitions.WPD_DEVICE_OBJECT_ID)
 
     @property
-    @cache
     def root_objects(self) -> ObjectList:
         return self.device_object.children()
 
@@ -125,7 +133,8 @@ class Device:
             assert len(self.root_objects) == 1
             return self.root_objects[0]
 
-    def object_by_path(self, path: list[str]) -> Object:
+    def object_by_path(self, path: Iterable[str]) -> Object:
+        path = list(path)
         if path:
             root_name = path[0]
             child_path = path[1:]
@@ -134,14 +143,5 @@ class Device:
         else:
             return self.device_object
 
-    def walk(self, depth = 0) -> Iterator[tuple[int, Object]]:
+    def walk(self) -> Iterator[tuple[int, Object]]:
         yield from self.device_object.walk(depth = 0)
-
-    # Context manager ##########################################################
-
-    def __enter__(self):
-        self.open()
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.close()
