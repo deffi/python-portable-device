@@ -5,7 +5,7 @@ from portable_device_api import (PortableDeviceManager, PortableDevice, Portable
 from typing import Self
 
 from portable_device import Object, ObjectList
-from portable_device.exceptions import DeviceNotFound, AmbiguousDevice
+from portable_device.exceptions import DeviceNotFound, AmbiguousDevice, ObjectNotFound, AmbiguousObject
 
 
 @cache
@@ -129,9 +129,13 @@ class Device:
             return self.root_objects.by_object_name(name)
         else:
             # Select the only root object
-            # TODO better error handling
-            assert len(self.root_objects) == 1
-            return self.root_objects[0]
+            root_objects = self.root_objects
+            if len(root_objects) == 0:
+                raise ObjectNotFound(None)
+            elif len(root_objects) == 1:
+                return self.root_objects[0]
+            else:
+                raise AmbiguousObject(None)
 
     def object_by_path(self, path: Iterable[str]) -> Object:
         path = list(path)
