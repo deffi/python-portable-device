@@ -36,6 +36,11 @@ class Object:
         return [supported_properties.get_at(i) for i in range(supported_properties.get_count())]
 
     def _get_properties(self, keys: Iterable[PropertyKey]):
+        """
+        Returns PortableDeviceValues, on which you can call:
+          * get_string_value -> gets a string
+          * get_value -> gets a PropVariant, use .value for the actual value
+        """
         keys = list(keys)
 
         key_collection = PortableDeviceKeyCollection.create()
@@ -44,6 +49,7 @@ class Object:
 
         return self._properties.get_values(self._object_id, key_collection)
 
+    # TODO should return a dict?
     def get_properties(self, keys: Iterable[PropertyKey]):
         keys = list(keys)
 
@@ -63,11 +69,14 @@ class Object:
         # Or maybe we could embed the expected value in the PropertyKey
         return [properties.get_value(key).value for key in keys]
 
+    def get_property(self, key: PropertyKey):
+        return self._get_properties([key]).get_value(key).value
+
     def object_name(self) -> str:
-        return self._get_properties([definitions.WPD_OBJECT_NAME]).get_string_value(definitions.WPD_OBJECT_NAME)
+        return self.get_property(definitions.WPD_OBJECT_NAME)
 
     def file_name(self) -> str:
-        return self._get_properties([definitions.WPD_OBJECT_ORIGINAL_FILE_NAME]).get_string_value(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME)
+        return self.get_property(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME)
 
     # Object property attributes ###############################################
 
