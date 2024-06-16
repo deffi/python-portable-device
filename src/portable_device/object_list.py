@@ -20,15 +20,15 @@ class ObjectList(list["Object"]):
     # TODO rename to file_names everywhere?
     def object_orignal_file_names(self) -> Iterator[str]:
         for object_ in self:
-            yield object_.object_original_file_name()
+            yield object_.file_name()
 
     def by_object_name(self, object_name: str) -> "Object":
         matching_objects = [o for o in self if o.object_name() == object_name]
         assert len(matching_objects) == 1
         return matching_objects[0]
 
-    def by_object_original_file_name(self, object_original_file_name: str) -> "Object":
-        matching_objects = [o for o in self if o.object_original_file_name() == object_original_file_name]
+    def by_file_name(self, file_name: str) -> "Object":
+        matching_objects = [o for o in self if o.file_name() == file_name]
         assert len(matching_objects) == 1
         return matching_objects[0]
 

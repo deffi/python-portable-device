@@ -33,7 +33,7 @@ class Object:
         keys.add(definitions.WPD_OBJECT_NAME)
         return self._properties.get_values(self._object_id, keys).get_string_value(definitions.WPD_OBJECT_NAME)
 
-    def object_original_file_name(self) -> str:
+    def file_name(self) -> str:
         keys = PortableDeviceKeyCollection.create()
         keys.add(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME)
         return self._properties.get_values(self._object_id, keys).get_string_value(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME)
@@ -87,7 +87,7 @@ class Object:
         current = self
 
         for child_name in child_path:
-            current = current.children().by_object_original_file_name(child_name)
+            current = current.children().by_file_name(child_name)
 
         return current
 

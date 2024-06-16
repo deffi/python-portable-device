@@ -41,7 +41,7 @@ class TestObject:
         # Create the file
         file = test_dir.upload_file(file_name, content)
         assert file_name in test_dir.children().object_orignal_file_names()
-        assert test_dir.children().by_object_original_file_name(file_name).object_id == file.object_id
+        assert test_dir.children().by_file_name(file_name).object_id == file.object_id
 
         # Download the file
         assert file.download_all() == content
@@ -73,7 +73,7 @@ class TestObject:
         assert file_name not in source.children().object_names()
         assert file_name in target.children().object_names()
 
-        assert target.children().by_object_original_file_name(file_name).object_id == file.object_id
+        assert target.children().by_file_name(file_name).object_id == file.object_id
         assert file.download_all() == content
 
         source.delete(recursive=True)
@@ -88,7 +88,7 @@ class TestObject:
         # Create the file
         file = test_dir.upload_file(file_name, content)
         assert file_name in test_dir.children().object_orignal_file_names()
-        assert test_dir.children().by_object_original_file_name(file_name).object_id == file.object_id
+        assert test_dir.children().by_file_name(file_name).object_id == file.object_id
 
         # Download the file
         download = file.download(chunk_size=3)
@@ -118,7 +118,7 @@ class TestObject:
         # Create the file
         file = test_dir.upload_file(file_name, content)
         assert file_name in test_dir.children().object_orignal_file_names()
-        assert test_dir.children().by_object_original_file_name(file_name).object_id == file.object_id
+        assert test_dir.children().by_file_name(file_name).object_id == file.object_id
 
         # Download the file
         download = file.download(chunk_size=3)

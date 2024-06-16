@@ -59,14 +59,14 @@ def ls(device_description: str):
             for depth, object_ in device.walk():
                 oid = object_._object_id
 
-                content_type, object_name, original_file_name = object_.get_properties([
+                content_type, object_name, file_name = object_.get_properties([
                     definitions.WPD_OBJECT_CONTENT_TYPE,
                     definitions.WPD_OBJECT_NAME,
                     definitions.WPD_OBJECT_ORIGINAL_FILE_NAME,
                 ])
                 content_type = definitions.reverse_lookup.get(content_type, content_type)
 
-                print(f"{'  ' * depth}{oid:<55}{content_type:<42}{object_name:<40}{original_file_name:<45}")
+                print(f"{'  ' * depth}{oid:<55}{content_type:<42}{object_name:<40}{file_name:<45}")
                 # _dump_properties(properties, oid, depth + 1)
     except DeviceNotFound as e:
         print(e)
