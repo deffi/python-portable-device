@@ -153,7 +153,7 @@ class Object:
 
         return type(self)(self._device, stream.get_object_id())
 
-    # File access ##############################################################
+    # Download #################################################################
 
     # You must exhaust or close the iterator, or you won't be able to delete
     # the file
