@@ -23,9 +23,13 @@ class Object:
         self._content = self._device._content
         self._properties = self._device._properties
 
+    # Properties ###############################################################
+
     @property
     def object_id(self) -> str:
         return self._object_id
+
+    # Object properties ########################################################
 
     # TODO test that it can be changed or cache it
     def object_name(self) -> str:
@@ -33,27 +37,11 @@ class Object:
         keys.add(definitions.WPD_OBJECT_NAME)
         return self._properties.get_values(self._object_id, keys).get_string_value(definitions.WPD_OBJECT_NAME)
 
+    # TODO test that it can be changed or cache it
     def file_name(self) -> str:
         keys = PortableDeviceKeyCollection.create()
         keys.add(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME)
         return self._properties.get_values(self._object_id, keys).get_string_value(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME)
-
-    def _children(self) -> Iterator[Self]:
-        enum_object_ids = self._content.enum_objects(self._object_id)
-
-        while object_ids := enum_object_ids.next(1):
-            for object_id in object_ids:
-                yield Object(self._device, object_id)
-
-    # TODO a custom generator would be nicer
-    def children(self) -> ObjectList:
-        return ObjectList(self._children())
-
-    def walk(self, *, depth = 0) -> Iterator[tuple[int, Self]]:
-        yield depth, self
-
-        for child in self.children():
-            yield from child.walk(depth = depth + 1)
 
     def get_properties(self, keys: Sequence[PropertyKey]):
         key_collection = PortableDeviceKeyCollection.create()
@@ -75,13 +63,32 @@ class Object:
         # Or maybe we could embed the expected value in the PropertyKey
         return [property_values.get_value(key).value for key in keys]
 
-    def create_directory(self, dir_name: str) -> Self:
-        values = PortableDeviceValues.create()
-        values.set_guid_value(definitions.WPD_OBJECT_CONTENT_TYPE, definitions.WPD_CONTENT_TYPE_FOLDER)
-        values.set_string_value(definitions.WPD_OBJECT_PARENT_ID, self._object_id)
-        values.set_string_value(definitions.WPD_OBJECT_NAME, dir_name)
+    def supported_properties(self) -> list[PropertyKey]:
+        supported_properties = self._properties.get_supported_properties(self._object_id)
+        return [supported_properties.get_at(i) for i in range(supported_properties.get_count())]
 
-        return type(self)(self._device, self._content.create_object_with_properties_only(values))
+    # Object property attributes ###############################################
+
+    def property_attributes(self, property: PropertyKey) -> dict:  # TODO more specific
+        attributes = self._properties.get_property_attributes(self._object_id, property)
+        result = {}
+        for i in range(attributes.get_count()):
+            key, value = attributes.get_at(i)
+            result[key] = value.value
+        return result
+
+    # Children #################################################################
+
+    def _children(self) -> Iterator[Self]:
+        enum_object_ids = self._content.enum_objects(self._object_id)
+
+        while object_ids := enum_object_ids.next(1):
+            for object_id in object_ids:
+                yield Object(self._device, object_id)
+
+    # TODO a custom generator would be nicer
+    def children(self) -> ObjectList:
+        return ObjectList(self._children())
 
     def child_by_path(self, child_path: list[str]) -> Self:
         current = self
@@ -91,29 +98,21 @@ class Object:
 
         return current
 
-    def delete(self, recursive: bool):
-        object_ids_pvc = PortableDevicePropVariantCollection.create()
-        # TODO multi-delete
-        object_ids_pvc.add(PropVariant.create(VT_LPWSTR, self._object_id))
+    def walk(self, *, depth = 0) -> Iterator[tuple[int, Self]]:
+        yield depth, self
 
-        if recursive:
-            flags = definitions.DELETE_OBJECT_OPTIONS.PORTABLE_DEVICE_DELETE_WITH_RECURSION
-        else:
-            flags = definitions.DELETE_OBJECT_OPTIONS.PORTABLE_DEVICE_DELETE_NO_RECURSION
+        for child in self.children():
+            yield from child.walk(depth = depth + 1)
 
-        delete_result = self._content.delete(flags, object_ids_pvc)
-        assert delete_result.get_count() == 1
-        # TODO exception if the hresult is not 0
-        return errors.to_hresult(delete_result.get_at(0).value)
+    # Child creation ###########################################################
 
-    def move_into(self, target: Object):
-        # TODO multi-move
-        object_ids_pvc = PortableDevicePropVariantCollection.create()
-        object_ids_pvc.add(PropVariant.create(VT_LPWSTR, self._object_id))
+    def create_directory(self, dir_name: str) -> Self:
+        values = PortableDeviceValues.create()
+        values.set_guid_value(definitions.WPD_OBJECT_CONTENT_TYPE, definitions.WPD_CONTENT_TYPE_FOLDER)
+        values.set_string_value(definitions.WPD_OBJECT_PARENT_ID, self._object_id)
+        values.set_string_value(definitions.WPD_OBJECT_NAME, dir_name)
 
-        move_result = self._content.move(object_ids_pvc, target.object_id)
-        assert move_result.get_count() == 1
-        return errors.to_hresult(move_result.get_at(0).value)
+        return type(self)(self._device, self._content.create_object_with_properties_only(values))
 
     # TODO rename
     def upload_file(self, file_name: str, content: bytes) -> Self:
@@ -133,6 +132,8 @@ class Object:
         stream.commit()
 
         return type(self)(self._device, stream.get_object_id())
+
+    # File access ##############################################################
 
     # You must exhaust or close the iterator, or you won't be able to delete
     # the file
@@ -161,14 +162,28 @@ class Object:
             buffer.extend(chunk)
         return buffer
 
-    def supported_properties(self) -> list[PropertyKey]:
-        supported_properties = self._properties.get_supported_properties(self._object_id)
-        return [supported_properties.get_at(i) for i in range(supported_properties.get_count())]
+    # Modification #############################################################
 
-    def property_attributes(self, property: PropertyKey) -> dict:  # TODO more specific
-        attributes = self._properties.get_property_attributes(self._object_id, property)
-        result = {}
-        for i in range(attributes.get_count()):
-            key, value = attributes.get_at(i)
-            result[key] = value.value
-        return result
+    def delete(self, recursive: bool):
+        object_ids_pvc = PortableDevicePropVariantCollection.create()
+        # TODO multi-delete
+        object_ids_pvc.add(PropVariant.create(VT_LPWSTR, self._object_id))
+
+        if recursive:
+            flags = definitions.DELETE_OBJECT_OPTIONS.PORTABLE_DEVICE_DELETE_WITH_RECURSION
+        else:
+            flags = definitions.DELETE_OBJECT_OPTIONS.PORTABLE_DEVICE_DELETE_NO_RECURSION
+
+        delete_result = self._content.delete(flags, object_ids_pvc)
+        assert delete_result.get_count() == 1
+        # TODO exception if the hresult is not 0
+        return errors.to_hresult(delete_result.get_at(0).value)
+
+    def move_into(self, target: Object):
+        # TODO multi-move
+        object_ids_pvc = PortableDevicePropVariantCollection.create()
+        object_ids_pvc.add(PropVariant.create(VT_LPWSTR, self._object_id))
+
+        move_result = self._content.move(object_ids_pvc, target.object_id)
+        assert move_result.get_count() == 1
+        return errors.to_hresult(move_result.get_at(0).value)
