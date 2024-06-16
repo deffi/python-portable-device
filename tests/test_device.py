@@ -12,10 +12,6 @@ class TestDevice:
 
     # Creation #################################################################
 
-    def test_ids(self):
-        device_ids = Device.ids()
-        assert all([isinstance(device_id, str) for device_id in device_ids])
-
     def test_all(self):
         devices = Device.all()
         assert all([isinstance(device, Device) for device in devices])

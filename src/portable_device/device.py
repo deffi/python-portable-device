@@ -20,38 +20,38 @@ class Device:
     # Creation #################################################################
 
     @classmethod
-    def ids(cls, refresh = True) -> Iterator[str]:
-        yield from _manager().get_devices()
+    def all(cls, *, refresh = True) -> Iterator[Self]:
+        if refresh:
+            _manager().refresh_device_list()
 
-    @classmethod
-    def all(cls, refresh = True) -> Iterator[Self]:
-        for device_id in cls.ids(refresh = refresh):
+        for device_id in _manager().get_devices():
             yield cls(device_id)
 
     @classmethod
     def by_description(cls, description: str, *,
                        refresh = True, ignore_trailing_space: bool = True) -> Self:
-        if refresh:
-            _manager().refresh_device_list()
 
-        for device_id in _manager().get_devices():
-            this_device_description = _manager().get_device_description(device_id)
-            if ignore_trailing_space:
-                this_device_description = this_device_description.rstrip()
+        description_map = str.rstrip if ignore_trailing_space else str
+        matching_devices = [device for device in cls.all(refresh=refresh)
+                            if description_map(device.description) == description_map(description)]
 
-            if this_device_description == description:
-                return Device(device_id)
+        if matching_devices:
+            # TODO better error handling
+            assert len(matching_devices) == 1
+            return matching_devices[0]
         else:
             raise DeviceNotFound(description)
 
     @classmethod
     def by_friendly_name(cls, friendly_name: str, *, refresh = True) -> Self:
-        if refresh:
-            _manager().refresh_device_list()
+        all_devices = cls.all(refresh=refresh)
+        matching_devices = [device for device in all_devices
+                            if device.friendly_name == friendly_name]
 
-        for device_id in _manager().get_devices():
-            if _manager().get_device_friendly_name(device_id) == friendly_name:
-                return Device(device_id)
+        if matching_devices:
+            # TODO better error handling
+            assert len(matching_devices) == 1
+            return matching_devices[0]
         else:
             raise DeviceNotFound(friendly_name)
 
