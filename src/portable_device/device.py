@@ -16,7 +16,6 @@ def _manager() -> PortableDeviceManager:
 class Device:
     def __init__(self, device_id: str):
         self._device_id = device_id
-        self._device = PortableDevice.create()
 
     # Creation #################################################################
 
@@ -57,6 +56,11 @@ class Device:
             raise DeviceNotFound(friendly_name)
 
     # Open #####################################################################
+
+    @property
+    @cache
+    def _device(self):
+        return PortableDevice.create()
 
     def open(self):
         self._device.open(self._device_id)
