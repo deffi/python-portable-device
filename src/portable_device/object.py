@@ -97,63 +97,7 @@ class Object:
             result[key] = value.value
         return result
 
-    # Children #################################################################
-
-    def _children(self) -> Iterator[Self]:
-        enum_object_ids = self._content.enum_objects(self._object_id)
-
-        while object_ids := enum_object_ids.next(1):
-            for object_id in object_ids:
-                yield Object(self._device, object_id)
-
-    # TODO a custom generator would be nicer
-    def children(self) -> ObjectList:
-        return ObjectList(self._children())
-
-    def child_by_path(self, child_path: list[str]) -> Self:
-        current = self
-
-        for child_name in child_path:
-            current = current.children().by_file_name(child_name)
-
-        return current
-
-    def walk(self, *, depth = 0) -> Iterator[tuple[int, Self]]:
-        yield depth, self
-
-        for child in self.children():
-            yield from child.walk(depth = depth + 1)
-
-    # Child creation ###########################################################
-
-    def create_directory(self, dir_name: str) -> Self:
-        values = PortableDeviceValues.create()
-        values.set_guid_value(definitions.WPD_OBJECT_CONTENT_TYPE, definitions.WPD_CONTENT_TYPE_FOLDER)
-        values.set_string_value(definitions.WPD_OBJECT_PARENT_ID, self._object_id)
-        values.set_string_value(definitions.WPD_OBJECT_NAME, dir_name)
-
-        return type(self)(self._device, self._content.create_object_with_properties_only(values))
-
-    # TODO rename
-    def upload_file(self, file_name: str, content: bytes) -> Self:
-        values = PortableDeviceValues.create()
-        values.set_string_value(definitions.WPD_OBJECT_PARENT_ID, self._object_id)
-        values.set_unsigned_large_integer_value(definitions.WPD_OBJECT_SIZE, len(content))
-        values.set_string_value(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME, file_name)
-        values.set_string_value(definitions.WPD_OBJECT_NAME, file_name)
-
-        stream, chunk_size = self._content.create_object_with_properties_and_data(values)
-        buffer = bytearray(content)
-        while buffer:
-            this_chunk_size = min(len(buffer), chunk_size)
-            chunk = buffer[0:this_chunk_size]
-            buffer[0:this_chunk_size] = []
-            stream.remote_write(chunk)
-        stream.commit()
-
-        return type(self)(self._device, stream.get_object_id())
-
-    # Download #################################################################
+    # Object access ############################################################
 
     # You must exhaust or close the iterator, or you won't be able to delete
     # the file
@@ -182,8 +126,6 @@ class Object:
             buffer.extend(chunk)
         return buffer
 
-    # Modification #############################################################
-
     def delete(self, recursive: bool):
         # TODO exception if the result is not 0
         return ObjectList([self]).delete(recursive)[0]
@@ -191,3 +133,57 @@ class Object:
     def move_into(self, target: Object):
         # TODO exception if the result is not 0
         return ObjectList([self]).move_into(target)[0]
+
+    # Children #################################################################
+
+    def _children(self) -> Iterator[Self]:
+        enum_object_ids = self._content.enum_objects(self._object_id)
+
+        while object_ids := enum_object_ids.next(1):
+            for object_id in object_ids:
+                yield Object(self._device, object_id)
+
+    # TODO a custom generator would be nicer
+    def children(self) -> ObjectList:
+        return ObjectList(self._children())
+
+    def child_by_path(self, child_path: list[str]) -> Self:
+        current = self
+
+        for child_name in child_path:
+            current = current.children().by_file_name(child_name)
+
+        return current
+
+    def walk(self, *, depth = 0) -> Iterator[tuple[int, Self]]:
+        yield depth, self
+
+        for child in self.children():
+            yield from child.walk(depth = depth + 1)
+
+    def create_directory(self, dir_name: str) -> Self:
+        values = PortableDeviceValues.create()
+        values.set_guid_value(definitions.WPD_OBJECT_CONTENT_TYPE, definitions.WPD_CONTENT_TYPE_FOLDER)
+        values.set_string_value(definitions.WPD_OBJECT_PARENT_ID, self._object_id)
+        values.set_string_value(definitions.WPD_OBJECT_NAME, dir_name)
+
+        return type(self)(self._device, self._content.create_object_with_properties_only(values))
+
+    # TODO rename
+    def upload_file(self, file_name: str, content: bytes) -> Self:
+        values = PortableDeviceValues.create()
+        values.set_string_value(definitions.WPD_OBJECT_PARENT_ID, self._object_id)
+        values.set_unsigned_large_integer_value(definitions.WPD_OBJECT_SIZE, len(content))
+        values.set_string_value(definitions.WPD_OBJECT_ORIGINAL_FILE_NAME, file_name)
+        values.set_string_value(definitions.WPD_OBJECT_NAME, file_name)
+
+        stream, chunk_size = self._content.create_object_with_properties_and_data(values)
+        buffer = bytearray(content)
+        while buffer:
+            this_chunk_size = min(len(buffer), chunk_size)
+            chunk = buffer[0:this_chunk_size]
+            buffer[0:this_chunk_size] = []
+            stream.remote_write(chunk)
+        stream.commit()
+
+        return type(self)(self._device, stream.get_object_id())
