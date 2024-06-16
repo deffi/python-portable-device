@@ -110,20 +110,22 @@ class Device:
     def root_objects(self) -> ObjectList:
         return self.device_object.children()
 
+    def root_object(self, name: str) -> Object:
+        if name:
+            # Select root object by name
+            return self.root_objects.by_object_name(name)
+        else:
+            # Select the only root object
+            # TODO better error handling
+            assert len(self.root_objects) == 1
+            return self.root_objects[0]
+
     def object_by_path(self, path: list[str]) -> Object:
         if path:
             root_name = path[0]
             child_path = path[1:]
 
-            if root_name:
-                # Select root object by name
-                root_object = self.root_objects.by_object_name(path[0])
-            else:
-                # Select the only root object
-                assert len(self.root_objects) == 1
-                root_object = self.root_objects[0]
-
-            return root_object.child_by_path(child_path)
+            return self.root_object(root_name).child_by_path(child_path)
         else:
             return self.device_object
 
