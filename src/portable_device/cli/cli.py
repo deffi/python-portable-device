@@ -63,7 +63,7 @@ def ls(device_description: str):
                     definitions.WPD_OBJECT_CONTENT_TYPE,
                     definitions.WPD_OBJECT_NAME,
                     definitions.WPD_OBJECT_ORIGINAL_FILE_NAME,
-                ])
+                ]).values()
                 content_type = definitions.reverse_lookup.get(content_type, content_type)
 
                 print(f"{'  ' * depth}{oid:<55}{content_type:<42}{object_name:<40}{file_name:<45}")

@@ -49,7 +49,6 @@ class Object:
 
         return self._properties.get_values(self._object_id, key_collection)
 
-    # TODO should return a dict?
     def get_properties(self, keys: Iterable[PropertyKey]):
         keys = list(keys)
 
@@ -67,7 +66,7 @@ class Object:
         # (returns key, value) and check for presence ourselves.
         # Also explain this in portable_device_api.PortableDeviceValues
         # Or maybe we could embed the expected value in the PropertyKey
-        return [properties.get_value(key).value for key in keys]
+        return {key: properties.get_value(key).value for key in keys}
 
     def get_property(self, key: PropertyKey):
         return self._get_properties([key]).get_value(key).value

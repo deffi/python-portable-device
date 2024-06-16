@@ -163,7 +163,7 @@ class TestObject:
         content_type, date_created = test_dir.get_properties([
             definitions.WPD_OBJECT_CONTENT_TYPE,
             definitions.WPD_OBJECT_DATE_CREATED,
-        ])
+        ]).values()
 
         assert content_type == definitions.WPD_CONTENT_TYPE_FOLDER  # TODO also test a file
         # TODO re-enable where supported by driver (not for MTP Android)
