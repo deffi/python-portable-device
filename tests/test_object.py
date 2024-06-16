@@ -6,7 +6,7 @@ import pytest
 
 from portable_device import Object
 
-from fixtures import test_dir
+from fixtures import test_dir, device
 
 
 class TestObject:
@@ -145,6 +145,21 @@ class TestObject:
         target.delete(recursive=True)
 
     # TODO test_move_directory
+
+    # Parent ###################################################################
+
+    def test_parent(self, test_dir):
+        subdirectory = test_dir.create_directory("subdirectory")
+        assert subdirectory.parent().object_id == test_dir.object_id
+
+    def test_parent_of_root(self, device):
+        with device:
+            root = device.root_objects()[0]
+            assert root.parent().object_id == device.device_object.object_id
+
+    def test_parent_of_device_object(self, device):
+        with device:
+            assert device.device_object.parent() is None
 
     # Children #################################################################
 

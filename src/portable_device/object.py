@@ -134,6 +134,15 @@ class Object:
         # TODO exception if the result is not 0
         return ObjectList([self]).move_into(target)[0]
 
+    # Parent ###################################################################
+
+    def parent(self) -> Self | None:
+        parent_object_id = self.get_property(definitions.WPD_OBJECT_PARENT_ID)
+        if parent_object_id == "":
+            return None
+        else:
+            return type(self)(self._device, parent_object_id)
+
     # Children #################################################################
 
     def _children(self) -> Iterator[Self]:
