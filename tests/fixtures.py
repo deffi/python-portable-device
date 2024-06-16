@@ -8,6 +8,9 @@ from portable_device import Device, Object
 
 @pytest.fixture(scope = "session")
 def device():
+    """If you want to access the device, you must open it first (using the ope
+    method or the context manager)"""
+
     # TODO support subdirectories or document that we don't
     device_description, *base_path = os.environ["PORTABLE_DEVICE_TEST_PATH"].split("/")
 
