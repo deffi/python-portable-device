@@ -12,6 +12,15 @@ from fixtures import test_dir, device
 class TestObject:
     # Properties ###############################################################
 
+    @pytest.mark.device
+    def test_device(self, device):
+        with device:
+            device_object = device.device_object
+            root_object = device.root_objects()[0]
+
+            assert device_object.device is device
+            assert root_object.device is device
+
     # Object properties ########################################################
 
     @pytest.mark.device

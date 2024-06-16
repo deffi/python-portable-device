@@ -23,7 +23,7 @@ class TestDevice:
 
     @pytest.mark.device
     def test_find(self, device):
-        other = Device.find(lambda d: d.device_id == device.device_id, device.device_id)
+        other = Device.find(lambda d: d.device_id == device.device_id, repr(device.device_id))
         assert isinstance(other, Device)
         assert other.device_id == device.device_id
 

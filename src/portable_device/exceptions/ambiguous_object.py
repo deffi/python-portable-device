@@ -3,7 +3,4 @@ class AmbiguousObject(RuntimeError):
         self.reference = reference
 
     def __str__(self) -> str:
-        if self.reference is None:
-            return "Ambiguous root object"
-        else:
-            return f"Ambiguous object: {self.reference!r}"
+        return f"Ambiguous object: {self.reference}"

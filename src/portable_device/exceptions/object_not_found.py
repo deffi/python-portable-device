@@ -3,7 +3,4 @@ class ObjectNotFound(RuntimeError):
         self.reference = reference
 
     def __str__(self) -> str:
-        if self.reference is None:
-            return f"Root object not found"
-        else:
-            return f"Object not found: {self.reference!r}"
+        return f"Object not found: {self.reference}"

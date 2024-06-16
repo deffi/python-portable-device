@@ -130,11 +130,11 @@ class Device:
             # Select the only root object
             root_objects = self.root_objects()
             if len(root_objects) == 0:
-                raise ObjectNotFound(None)
+                raise ObjectNotFound("root object")
             elif len(root_objects) == 1:
                 return root_objects[0]
             else:
-                raise AmbiguousObject(None)
+                raise AmbiguousObject("root object")
 
     def object_by_path(self, path: Iterable[str]) -> Object:
         path = list(path)
