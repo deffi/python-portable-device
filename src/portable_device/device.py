@@ -5,7 +5,7 @@ from portable_device_api import (PortableDeviceManager, PortableDevice, Portable
 from typing import Self
 
 from portable_device import Object, ObjectList
-from portable_device.exceptions import DeviceNotFound
+from portable_device.exceptions import DeviceNotFound, AmbiguousDevice
 
 
 @cache
@@ -35,12 +35,12 @@ class Device:
         matching_devices = [device for device in cls.all(refresh=refresh)
                             if description_map(device.description) == description_map(description)]
 
-        if matching_devices:
-            # TODO better error handling
-            assert len(matching_devices) == 1
+        if len(matching_devices) == 0:
+            raise DeviceNotFound(description)
+        elif len(matching_devices) == 1:
             return matching_devices[0]
         else:
-            raise DeviceNotFound(description)
+            raise AmbiguousDevice(description)
 
     @classmethod
     def by_friendly_name(cls, friendly_name: str, *, refresh = True) -> Self:
@@ -48,12 +48,12 @@ class Device:
         matching_devices = [device for device in all_devices
                             if device.friendly_name == friendly_name]
 
-        if matching_devices:
-            # TODO better error handling
-            assert len(matching_devices) == 1
+        if len(matching_devices) == 0:
+            raise DeviceNotFound(friendly_name)
+        elif len(matching_devices) == 1:
             return matching_devices[0]
         else:
-            raise DeviceNotFound(friendly_name)
+            raise AmbiguousDevice(friendly_name)
 
     # Open #####################################################################
 
