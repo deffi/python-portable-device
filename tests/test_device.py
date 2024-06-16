@@ -28,12 +28,12 @@ class TestDevice:
         assert other.device_id == device.device_id
 
     def test_find_not_found(self):
-        with pytest.raises(DeviceNotFound):
+        with pytest.raises(DeviceNotFound, match = r"Device not found: none"):
             Device.find(lambda device: False, "none")
 
     @pytest.mark.devices
     def test_find_ambiguous(self):
-        with pytest.raises(AmbiguousDevice):
+        with pytest.raises(AmbiguousDevice, match = r"Ambiguous device: all"):
             Device.find(lambda device: True, "all")
 
     @pytest.mark.device
