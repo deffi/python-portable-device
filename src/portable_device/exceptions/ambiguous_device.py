@@ -3,4 +3,4 @@ class AmbiguousDevice(RuntimeError):
         self.reference = reference
 
     def __str__(self) -> str:
-        return f"Ambiguous device: {self.reference!r}"
+        return f"Ambiguous device: {self.reference}"

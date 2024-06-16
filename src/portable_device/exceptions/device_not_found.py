@@ -3,4 +3,4 @@ class DeviceNotFound(RuntimeError):
         self.reference = reference
 
     def __str__(self) -> str:
-        return f"Device not found: {self.reference!r}"
+        return f"Device not found: {self.reference}"
