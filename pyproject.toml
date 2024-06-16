@@ -44,4 +44,5 @@ build-backend = "poetry.core.masonry.api"
 pythonpath = ["src"]
 markers = [
     "device: tests that access a device",
+    "devices: tests that need more than one device",
 ]
