@@ -31,6 +31,7 @@ class TestDevice:
         with pytest.raises(DeviceNotFound, match = r"Device not found: none"):
             Device.find(lambda device: False, "none")
 
+    @pytest.mark.device
     @pytest.mark.devices
     def test_find_ambiguous(self):
         with pytest.raises(AmbiguousDevice, match = r"Ambiguous device: all"):
